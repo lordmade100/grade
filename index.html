@@ -452,6 +452,20 @@
         }
     });
 
+    // --- HELPER TO GET OR CREATE UID ---
+    function getActiveUid() {
+        if (currentUser) return currentUser.uid;
+        
+        let guestId = localStorage.getItem('guestId');
+        if (!guestId) {
+            guestId = 'guest_' + Date.now() + Math.floor(Math.random() * 1000);
+            localStorage.setItem('guestId', guestId);
+        } else if (!guestId.startsWith('guest_')) {
+            guestId = 'guest_' + guestId;
+        }
+        return guestId;
+    }
+
     // --- HUMAN CHAT STATE ---
     let currentHumanStatus = null;
 
@@ -475,10 +489,7 @@
       }
 
       // --- Initialize Human Chat Listeners for this session ---
-      const uid = user ? user.uid : 'guest_' + (localStorage.getItem('guestId') || Date.now());
-      if (!user && !localStorage.getItem('guestId')) {
-          localStorage.setItem('guestId', uid.replace('guest_', ''));
-      }
+      const uid = getActiveUid();
       
       const humanChatMessages = document.getElementById('humanChatMessages');
       humanChatMessages.innerHTML = ''; 
@@ -526,41 +537,64 @@
         humanChatWindow.style.display = humanChatWindow.style.display === 'flex' ? 'none' : 'flex';
         chatDot.style.display = 'none';
         
-        // Add a starter message if chat is empty
         if(document.getElementById('humanChatMessages').children.length === 0) {
            document.getElementById('humanChatMessages').innerHTML = '<div class="human-msg-system">Send a message to request a live technician.</div>';
         }
     };
+    
     closeHumanChat.onclick = () => { humanChatWindow.style.display = 'none'; };
 
     async function sendToHuman() {
         const text = humanChatInput.value.trim();
         if (!text) return;
         
-        const uid = currentUser ? currentUser.uid : 'guest_' + localStorage.getItem('guestId');
+        // Use our reliable helper to ensure we always have a valid ID
+        const uid = getActiveUid();
+        
         const sessionRef = ref(db, `human_support/${uid}`);
         const chatRef = ref(db, `human_support/${uid}/messages`);
         
-        // Send actual message
-        await push(chatRef, {
-            sender: 'user',
-            text: text,
-            timestamp: serverTimestamp()
-        });
+        // Immediately clear input for a snappy UI feel
+        humanChatInput.value = '';
         
-        // Update request status to 'pending' if it's not active
-        const snap = await get(sessionRef);
-        const data = snap.val() || {};
-        if (data.status !== 'active') {
-            await update(sessionRef, { status: 'pending', timestamp: serverTimestamp() });
+        try {
+            // Push the message to Firebase
+            await push(chatRef, {
+                sender: 'user',
+                text: text,
+                timestamp: serverTimestamp()
+            });
+            
+            // Check session status and update to pending if needed
+            const snap = await get(sessionRef);
+            const data = snap.val() || {};
+            
+            if (data.status !== 'active') {
+                // Store some basic info so your admin dashboard knows who is calling
+                await update(sessionRef, { 
+                    status: 'pending', 
+                    timestamp: serverTimestamp(),
+                    displayName: currentUser ? currentUser.displayName : 'Guest',
+                    lastMessage: text
+                });
+                
+                const sysDiv = document.createElement('div');
+                sysDiv.className = 'human-msg-system';
+                sysDiv.innerText = 'Request sent. Waiting for a consultant to join...';
+                document.getElementById('humanChatMessages').appendChild(sysDiv);
+                document.getElementById('humanChatMessages').scrollTop = document.getElementById('humanChatMessages').scrollHeight;
+            } else {
+                // If active, just update the last message timestamp for the admin dashboard
+                await update(sessionRef, { lastMessageAt: serverTimestamp() });
+            }
+        } catch (error) {
+            console.error("Error saving message to Firebase:", error);
             const sysDiv = document.createElement('div');
             sysDiv.className = 'human-msg-system';
-            sysDiv.innerText = 'Request sent. Waiting for a consultant to join...';
+            sysDiv.style.color = 'var(--brand-red)';
+            sysDiv.innerText = 'Failed to send message. Please check your connection.';
             document.getElementById('humanChatMessages').appendChild(sysDiv);
-            document.getElementById('humanChatMessages').scrollTop = document.getElementById('humanChatMessages').scrollHeight;
         }
-        
-        humanChatInput.value = '';
     }
 
     sendHumanMsg.onclick = sendToHuman;
