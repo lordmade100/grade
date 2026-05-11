@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Rare Grade Tech AI</title>
+  <title>Steward | Rare Grade Tech</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -348,6 +348,37 @@
     .google-btn:hover { background: #f8f9fa; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .google-btn img { width: 24px; height: 24px; }
 
+    /* ════ CUSTOM ALERTS / DIALOGS ════ */
+    .dialog-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+      z-index: 2000; display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+
+    .dialog-container {
+      background: var(--bg-main); padding: 24px 24px 20px 24px; border-radius: 20px;
+      width: 90%; max-width: 340px; text-align: center; position: relative;
+      transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .dialog-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .dialog-message { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+    
+    .dialog-actions { display: flex; gap: 12px; justify-content: center; }
+    
+    .dialog-btn {
+      flex: 1; padding: 10px 16px; border-radius: 50px; border: none; font-family: inherit;
+      font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .dialog-btn.secondary { background: var(--bg-input); color: var(--text-primary); }
+    .dialog-btn.secondary:hover { background: #e0e4e9; }
+    .dialog-btn.primary { background: var(--brand-red); color: white; }
+    .dialog-btn.primary:hover { background: #c82333; }
+    .dialog-btn.primary-blue { background: var(--brand-blue); color: white; }
+    .dialog-btn.primary-blue:hover { background: #050c8a; }
+
     /* ════ RESPONSIVE ════ */
     @media (max-width: 768px) {
       .sidebar {
@@ -360,7 +391,6 @@
       .welcome-screen { margin-top: 5vh; }
       .input-wrapper { padding: 10px 15px 15px 15px; background: var(--bg-main); }
       
-      /* Bottom Sheet styling for mobile */
       .auth-overlay { align-items: flex-end; }
       .auth-container {
         width: 100%; max-width: 100%; border-radius: 28px 28px 0 0;
@@ -370,6 +400,15 @@
   </style>
 </head>
 <body>
+
+  <div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog-container" id="dialogContainer">
+      <h3 class="dialog-title" id="dialogTitle">Title</h3>
+      <p class="dialog-message" id="dialogMessage">Message</p>
+      <div class="dialog-actions" id="dialogActions">
+        </div>
+    </div>
+  </div>
 
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-container" id="authContainer">
@@ -454,7 +493,7 @@
 
     <div class="input-wrapper">
       <div class="input-box">
-        <input type="text" class="chat-input" id="userInput" placeholder="Ask about computer repairs or support here" autocomplete="off" />
+        <input type="text" class="chat-input" id="userInput" placeholder="Ask Steward about computer repairs or support here..." autocomplete="off" />
         <button class="action-btn" id="sendBtn">
           <i data-feather="send" style="width:20px;height:20px;"></i>
         </button>
@@ -486,6 +525,42 @@
         sidebar.classList.remove('open');
       }
     });
+
+    // --- CUSTOM DIALOG UI LOGIC ---
+    const dialogOverlay = document.getElementById('dialogOverlay');
+    const dialogContainer = document.getElementById('dialogContainer');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogMessage = document.getElementById('dialogMessage');
+    const dialogActions = document.getElementById('dialogActions');
+
+    window.showDialog = function(title, message, buttons) {
+        dialogTitle.innerText = title;
+        dialogMessage.innerText = message;
+        dialogActions.innerHTML = '';
+        
+        buttons.forEach(btn => {
+            const buttonEl = document.createElement('button');
+            buttonEl.className = `dialog-btn ${btn.type || 'secondary'}`;
+            buttonEl.innerText = btn.text;
+            buttonEl.onclick = () => {
+                window.closeDialog();
+                if(btn.onClick) btn.onClick();
+            };
+            dialogActions.appendChild(buttonEl);
+        });
+
+        dialogOverlay.style.display = 'flex';
+        setTimeout(() => {
+            dialogOverlay.style.opacity = '1';
+            dialogContainer.style.transform = 'scale(1)';
+        }, 10);
+    };
+
+    window.closeDialog = function() {
+        dialogOverlay.style.opacity = '0';
+        dialogContainer.style.transform = 'scale(0.95)';
+        setTimeout(() => { dialogOverlay.style.display = 'none'; }, 300);
+    };
 
     // --- FIREBASE CONFIG ---
     const firebaseConfig = {
@@ -526,20 +601,25 @@
       setTimeout(() => { authOverlay.style.display = 'none'; }, 300);
     };
 
-    closeAuthBtn.addEventListener('click', closeAuth);
+    closeAuthBtn.addEventListener('click', window.closeAuth);
     
-    // Close modal if clicked outside container
     authOverlay.addEventListener('click', (e) => {
-        if(e.target === authOverlay) closeAuth();
+        if(e.target === authOverlay) window.closeAuth();
     });
 
     profileBtn.addEventListener('click', () => {
         if (currentUser) {
-            if(confirm("Do you want to sign out of Rare Grade Tech?")) {
-                signOut(auth);
-            }
+            // Using Custom Dialog instead of window.confirm
+            window.showDialog(
+                "Sign Out", 
+                "Do you want to sign out of Rare Grade Tech?",
+                [
+                    { text: "Cancel", type: "secondary" },
+                    { text: "Sign Out", type: "primary", onClick: () => signOut(auth) }
+                ]
+            );
         } else {
-            openAuth();
+            window.openAuth();
         }
     });
 
@@ -547,10 +627,15 @@
     googleSignInBtn.addEventListener('click', async () => {
         try {
             await signInWithPopup(auth, googleProvider);
-            closeAuth();
+            window.closeAuth();
         } catch (error) {
             console.error("Sign-in error:", error);
-            alert("Failed to sign in. Please try again.");
+            // Using Custom Dialog instead of window.alert
+            window.showDialog(
+                "Sign In Failed", 
+                "We couldn't sign you in. Please try again.",
+                [ { text: "OK", type: "primary-blue" } ]
+            );
         }
     });
 
@@ -560,14 +645,11 @@
       const greetingText = document.getElementById('greetingText');
       
       if (user) {
-        // Fetch higher-res photo if available, fallback to provider photo
         avatarImg.src = user.photoURL || DEFAULT_AVATAR;
         greetingText.innerText = `Hello, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}`;
       } else {
         avatarImg.src = DEFAULT_AVATAR;
         greetingText.innerText = `Hello there`;
-        // Optionally open auth modal automatically for logged-out users:
-        // setTimeout(openAuth, 1000); 
       }
     });
 
@@ -587,7 +669,7 @@
     window.chatHistory = [
         { 
             role: "system", 
-            content: `You are Rare Grade Tech AI, an expert technical support and IT repair consultant. 
+            content: `You are Steward, an expert technical support and IT repair consultant from Rare Grade Tech company. 
             CRITICAL INSTRUCTION: You exclusively handle computer-related technical support, software troubleshooting, and hardware repair quotes for PCs, laptops, and computer peripherals. 
             If a user asks about ANYTHING else that is not related to computers (e.g., phones, cars, general knowledge, math, cooking, non-PC programming, etc.), you MUST politely decline to answer and instruct them to call the company support number: +27 0800 123 456. Do not attempt to answer non-computer related questions. Keep responses professional and well-formatted.`
         }
