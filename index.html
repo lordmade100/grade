@@ -12,7 +12,7 @@
 
   <style>
     /* ══════════════════════════════════════════
-       GEMINI-STYLE THEME SYSTEM
+        GEMINI-STYLE THEME SYSTEM
     ══════════════════════════════════════════ */
     :root {
         --bg-main: #FFFFFF;
@@ -406,6 +406,52 @@
     .dialog-btn.primary-blue { background: var(--brand-blue); color: white; }
     .dialog-btn.primary-blue:hover { background: #050c8a; }
 
+    /* ════ FLOATING HUMAN CHAT ════ */
+    .fab-chat {
+      position: fixed; bottom: 100px; right: 24px; width: 56px; height: 56px;
+      border-radius: 50%; background: var(--brand-blue); color: white; border: none;
+      cursor: pointer; box-shadow: 0 4px 12px rgba(6, 17, 177, 0.3);
+      z-index: 999; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    .fab-chat:hover { transform: scale(1.1); }
+
+    .notification-dot {
+      position: absolute; top: 15px; right: 15px; width: 10px; height: 10px;
+      background: var(--brand-red); border: 2px solid white; border-radius: 50%; display: none;
+    }
+
+    .human-chat-window {
+      position: fixed; bottom: 170px; right: 24px; width: 320px; height: 400px;
+      background: var(--bg-main); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: none; flex-direction: column; z-index: 1000; overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .human-chat-header {
+      background: var(--brand-blue); color: white; padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center; font-weight: 500;
+    }
+
+    .close-human-chat { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+
+    .human-chat-messages {
+      flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #fcfcfc;
+    }
+
+    .human-msg {
+      padding: 8px 12px; border-radius: 12px; font-size: 0.9rem; max-width: 80%; line-height: 1.4; word-wrap: break-word;
+    }
+    .human-msg.user { background: var(--bg-sidebar); align-self: flex-end; color: var(--text-primary); }
+    .human-msg.staff { background: var(--brand-blue); color: white; align-self: flex-start; }
+    .human-msg-system { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin: 4px 0; }
+
+    .human-chat-input-area { padding: 12px; display: flex; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-main); }
+    #humanChatInput {
+      flex: 1; border: 1px solid var(--border-color); border-radius: 20px;
+      padding: 8px 12px; outline: none; font-family: inherit; color: var(--text-primary);
+    }
+
     /* ════ RESPONSIVE ════ */
     @media (max-width: 768px) {
       .sidebar {
@@ -427,6 +473,9 @@
       
       .suggestion-card { transform: none !important; box-shadow: none !important; }
       .verified-badge { width: 30px; height: 30px; margin-left: 8px; }
+
+      .fab-chat { bottom: 90px; right: 16px; width: 50px; height: 50px; }
+      .human-chat-window { bottom: 150px; right: 16px; left: 16px; width: auto; }
     }
   </style>
 </head>
@@ -537,10 +586,33 @@
     </div>
   </main>
 
+  <!-- ════ NEW: FLOATING HUMAN CHAT ════ -->
+  <button class="fab-chat" id="humanChatBtn" title="Chat with a Consultant">
+    <i data-feather="user"></i>
+    <span class="notification-dot" id="chatDot"></span>
+  </button>
+
+  <div class="human-chat-window" id="humanChatWindow">
+    <div class="human-chat-header">
+      <span>Live Consultant</span>
+      <button class="close-human-chat" id="closeHumanChat">&times;</button>
+    </div>
+    <div class="human-chat-messages" id="humanChatMessages">
+      <div class="human-msg-system">Connecting to a Rare Grade technician...</div>
+    </div>
+    <div class="human-chat-input-area">
+      <input type="text" id="humanChatInput" placeholder="Type a message..." autocomplete="off">
+      <button id="sendHumanMsg" style="background:none;border:none;color:var(--brand-blue);cursor:pointer;padding:8px;">
+        <i data-feather="send" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, get, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // ADDED onChildAdded for Realtime DB listeners
+    import { getDatabase, ref, get, push, set, serverTimestamp, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getRemoteConfig, fetchAndActivate, getValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-remote-config.js";
 
     // Initialize Icons
@@ -728,7 +800,63 @@
         sidebarHistoryList.innerHTML = ''; // clear sidebar
         startNewChat();
       }
+
+      // --- Initialize Human Chat Listener for this session ---
+      const uid = user ? user.uid : 'guest_' + (localStorage.getItem('guestId') || Date.now());
+      if (!user && !localStorage.getItem('guestId')) {
+          localStorage.setItem('guestId', uid.replace('guest_', ''));
+      }
+      
+      const humanChatMessages = document.getElementById('humanChatMessages');
+      humanChatMessages.innerHTML = '<div class="human-msg-system">Connecting to a Rare Grade technician...</div>'; // reset
+      const supportRef = ref(db, `human_support/${uid}/messages`);
+      
+      onChildAdded(supportRef, (data) => {
+          const msg = data.val();
+          const msgDiv = document.createElement('div');
+          msgDiv.className = `human-msg ${msg.sender}`;
+          msgDiv.innerText = msg.text;
+          humanChatMessages.appendChild(msgDiv);
+          humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
+          
+          if (document.getElementById('humanChatWindow').style.display !== 'flex' && msg.sender === 'staff') {
+              document.getElementById('chatDot').style.display = 'block';
+          }
+      });
     });
+
+    // --- HUMAN CHAT LOGIC ---
+    const humanChatBtn = document.getElementById('humanChatBtn');
+    const humanChatWindow = document.getElementById('humanChatWindow');
+    const closeHumanChat = document.getElementById('closeHumanChat');
+    const humanChatInput = document.getElementById('humanChatInput');
+    const sendHumanMsg = document.getElementById('sendHumanMsg');
+    const chatDot = document.getElementById('chatDot');
+
+    humanChatBtn.onclick = () => {
+        humanChatWindow.style.display = humanChatWindow.style.display === 'flex' ? 'none' : 'flex';
+        chatDot.style.display = 'none';
+    };
+    closeHumanChat.onclick = () => { humanChatWindow.style.display = 'none'; };
+
+    async function sendToHuman() {
+        const text = humanChatInput.value.trim();
+        if (!text) return;
+        
+        const uid = currentUser ? currentUser.uid : 'guest_' + localStorage.getItem('guestId');
+        const chatRef = ref(db, `human_support/${uid}/messages`);
+        
+        await push(chatRef, {
+            sender: 'user',
+            text: text,
+            timestamp: serverTimestamp()
+        });
+        
+        humanChatInput.value = '';
+    }
+
+    sendHumanMsg.onclick = sendToHuman;
+    humanChatInput.onkeypress = (e) => { if(e.key === 'Enter') sendToHuman(); };
 
     // --- CHAT HISTORY / FIREBASE SAVING ---
     async function loadSidebarChats(uid) {
