@@ -182,16 +182,17 @@
       margin-bottom: 8px;
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     /* Verified Badge SVG alignment */
     .verified-badge {
-      width: 44px;
-      height: 44px;
-      margin-left: 10px;
+      width: 38px;
+      height: 38px;
+      margin-left: 12px;
       vertical-align: middle;
       display: inline-block;
-      margin-bottom: 4px; /* visually align with text */
+      margin-bottom: 4px;
     }
 
     .subtitle {
@@ -448,13 +449,12 @@
       .auth-container {
         width: 100%; max-width: 100%; border-radius: 28px 28px 0 0;
         transform: translateY(100%); 
-        /* Added significant bottom padding so the sheet sits clearly above the visual level of the input bar */
         padding-bottom: calc(120px + env(safe-area-inset-bottom));
       }
       
       .suggestion-card { transform: none !important; box-shadow: none !important; }
       
-      .verified-badge { width: 34px; height: 34px; }
+      .verified-badge { width: 30px; height: 30px; margin-left: 8px; }
     }
   </style>
 </head>
@@ -694,11 +694,11 @@
     let currentUser = null;
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
     
-    // Official Blue Verified Badge SVG
+    // Official Twitter/X Verified Badge SVG (scalloped checkmark)
     const VERIFIED_BADGE_SVG = `
-      <svg class="verified-badge" viewBox="0 0 24 24">
-        <path d="M12 2l2.35 2.35 3.31-.73.73 3.31 2.35 2.35-2.35 2.35-.73 3.31-3.31-.73L12 22l-2.35-2.35-3.31.73-.73-3.31L3.26 12l2.35-2.35.73-3.31 3.31.73L12 2z" fill="#4285f4"/>
-        <path d="M10.41 16.59L6.41 12.59 7.83 11.17 10.41 13.76 16.17 8 17.59 9.41 10.41 16.59z" fill="#ffffff"/>
+      <svg class="verified-badge" viewBox="0 0 24 24" aria-label="Verified account">
+        <path fill="#1D9BF0" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.827 2.766 2.057 3.465-.056.297-.09.6-.09.914 0 2.21 1.71 4 3.918 4 .556 0 1.082-.114 1.56-.318.572 1.39 1.95 2.37 3.52 2.37s2.948-.98 3.52-2.37c.478.204 1.004.318 1.56.318 2.21 0 3.918-1.79 3.918-4 0-.314-.033-.617-.09-.914 1.23-.698 2.057-2.004 2.057-3.465z"></path>
+        <path fill="#FFFFFF" d="M15.34 8.36l-5.8 5.8-2.6-2.6c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4l3.3 3.3c.2.2.5.3.7.3s.5-.1.7-.3l6.5-6.5c.4-.4.4-1 0-1.4s-1-.4-1.4 0z"></path>
       </svg>
     `;
 
@@ -752,7 +752,7 @@
       if (user) {
         avatarImg.src = user.photoURL || DEFAULT_AVATAR;
         const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
-        // Inject name + verified badge securely using DOM nodes to prevent XSS
+        // Inject name + verified badge securely using DOM nodes
         greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
       } else {
         avatarImg.src = DEFAULT_AVATAR;
