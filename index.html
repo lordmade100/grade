@@ -288,115 +288,111 @@
     // Initialize Icons
     feather.replace();
 
-    // UI Logic
-    const sidebar = document.getElementById('sidebar');
-    const menuToggle = document.getElementById('menuToggle');
-    const welcomeScreen = document.getElementById('welcomeScreen');
-    const chatContainer = document.getElementById('chatContainer');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const mainScroll = document.getElementById('mainScroll');
-    const newChatBtn = document.getElementById('newChatBtn');
-    const sidebarHistoryList = document.getElementById('sidebarHistoryList');
+    // ─── DOM REFS ────────────────────────────────────────────────────────────────
+    const sidebar             = document.getElementById('sidebar');
+    const menuToggle          = document.getElementById('menuToggle');
+    const welcomeScreen       = document.getElementById('welcomeScreen');
+    const chatContainer       = document.getElementById('chatContainer');
+    const userInput           = document.getElementById('userInput');
+    const sendBtn             = document.getElementById('sendBtn');
+    const mainScroll          = document.getElementById('mainScroll');
+    const newChatBtn          = document.getElementById('newChatBtn');
+    const sidebarHistoryList  = document.getElementById('sidebarHistoryList');
+    const humanChatBtn        = document.getElementById('humanChatBtn');
+    const humanChatWindow     = document.getElementById('humanChatWindow');
+    const closeHumanChat      = document.getElementById('closeHumanChat');
+    const humanChatInput      = document.getElementById('humanChatInput');
+    const sendHumanMsg        = document.getElementById('sendHumanMsg');
+    const chatDot             = document.getElementById('chatDot');
+    const humanChatMessages   = document.getElementById('humanChatMessages');
+    const authOverlay         = document.getElementById('authOverlay');
+    const authContainer       = document.getElementById('authContainer');
+    const closeAuthBtn        = document.getElementById('closeAuthBtn');
+    const profileBtn          = document.getElementById('profileBtn');
+    const googleSignInBtn     = document.getElementById('googleSignInBtn');
+    const dialogOverlay       = document.getElementById('dialogOverlay');
+    const dialogContainer     = document.getElementById('dialogContainer');
+    const dialogTitle         = document.getElementById('dialogTitle');
+    const dialogMessage       = document.getElementById('dialogMessage');
+    const dialogActions       = document.getElementById('dialogActions');
 
-    menuToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { 
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
         if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-            sidebar.classList.remove('open'); 
+            sidebar.classList.remove('open');
         }
     });
 
-    // --- 3D PARALLAX EFFECT INITALIZATION ---
+    // ─── 3D PARALLAX CARDS ───────────────────────────────────────────────────────
     function initParallaxCards() {
-        if(window.innerWidth <= 768) return; 
-        const cards = document.querySelectorAll('.suggestion-card');
-        cards.forEach(card => {
+        if (window.innerWidth <= 768) return;
+        document.querySelectorAll('.suggestion-card').forEach(card => {
             card.addEventListener('mousemove', e => {
                 card.classList.remove('reset');
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -12; 
-                const rotateY = ((x - centerX) / centerX) * 12;
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-                card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.06)`;
+                const rect    = card.getBoundingClientRect();
+                const rotateX = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -12;
+                const rotateY = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  12;
+                card.style.transform  = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
+                card.style.boxShadow  = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.06)`;
             });
             card.addEventListener('mouseleave', () => {
                 card.classList.add('reset');
-                card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-                card.style.boxShadow = `0 4px 6px rgba(0,0,0,0.02)`;
+                card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+                card.style.boxShadow = '0 4px 6px rgba(0,0,0,0.02)';
             });
         });
     }
     initParallaxCards();
 
-    // --- CUSTOM DIALOG UI LOGIC ---
-    const dialogOverlay = document.getElementById('dialogOverlay');
-    const dialogContainer = document.getElementById('dialogContainer');
-    const dialogTitle = document.getElementById('dialogTitle');
-    const dialogMessage = document.getElementById('dialogMessage');
-    const dialogActions = document.getElementById('dialogActions');
-
+    // ─── CUSTOM DIALOG ───────────────────────────────────────────────────────────
     window.showDialog = function(title, message, buttons) {
-        dialogTitle.innerText = title;
+        dialogTitle.innerText   = title;
         dialogMessage.innerText = message;
         dialogActions.innerHTML = '';
         buttons.forEach(btn => {
-            const buttonEl = document.createElement('button');
-            buttonEl.className = `dialog-btn ${btn.type || 'secondary'}`;
-            buttonEl.innerText = btn.text;
-            buttonEl.onclick = () => {
-                window.closeDialog();
-                if(btn.onClick) btn.onClick();
-            };
-            dialogActions.appendChild(buttonEl);
+            const el = document.createElement('button');
+            el.className  = `dialog-btn ${btn.type || 'secondary'}`;
+            el.innerText  = btn.text;
+            el.onclick    = () => { window.closeDialog(); if (btn.onClick) btn.onClick(); };
+            dialogActions.appendChild(el);
         });
         dialogOverlay.style.display = 'flex';
         setTimeout(() => {
-            dialogOverlay.style.opacity = '1';
-            dialogContainer.style.transform = 'scale(1)';
+            dialogOverlay.style.opacity      = '1';
+            dialogContainer.style.transform  = 'scale(1)';
         }, 10);
     };
 
     window.closeDialog = function() {
-        dialogOverlay.style.opacity = '0';
+        dialogOverlay.style.opacity     = '0';
         dialogContainer.style.transform = 'scale(0.95)';
         setTimeout(() => { dialogOverlay.style.display = 'none'; }, 300);
     };
 
-    // --- FIREBASE CONFIG ---
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-  authDomain: "fire-b-a8878.firebaseapp.com",
-  databaseURL: "https://fire-b-a8878.firebaseio.com",
-  projectId: "fire-b-a8878",
-  storageBucket: "fire-b-a8878.firebasestorage.app",
-  messagingSenderId: "658673187627",
-  appId: "1:658673187627:web:32699cbc33e85f4bafa36e",
-  measurementId: "G-2505EVBRWX"
-};
+    // ─── FIREBASE ────────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+        apiKey:            "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+        authDomain:        "fire-b-a8878.firebaseapp.com",
+        databaseURL:       "https://fire-b-a8878.firebaseio.com",
+        projectId:         "fire-b-a8878",
+        storageBucket:     "fire-b-a8878.firebasestorage.app",
+        messagingSenderId: "658673187627",
+        appId:             "1:658673187627:web:32699cbc33e85f4bafa36e",
+        measurementId:     "G-2505EVBRWX"
+    };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    const app          = initializeApp(firebaseConfig);
+    const auth         = getAuth(app);
+    const db           = getDatabase(app);
     const remoteConfig = getRemoteConfig(app);
     remoteConfig.settings.minimumFetchIntervalMillis = 0;
 
-    // --- AUTH & STATE ---
-    const authOverlay = document.getElementById('authOverlay');
-    const authContainer = document.getElementById('authContainer');
-    const closeAuthBtn = document.getElementById('closeAuthBtn');
-    const profileBtn = document.getElementById('profileBtn');
-    const googleSignInBtn = document.getElementById('googleSignInBtn');
-    
-    let currentUser = null;
-    let currentChatId = null; 
+    // ─── AUTH STATE ──────────────────────────────────────────────────────────────
+    let currentUser   = null;
+    let currentChatId = null;
 
-    const SYSTEM_PROMPT = { 
-        role: "system", 
+    const SYSTEM_PROMPT = {
+        role: "system",
         content: `You are Steward, a professional technical support and IT repair consultant from Rare Grade Tech. 
         YOUR GOALS:
         1. Greet users warmly and proactively drive the conversation toward assisting with computer-related tech support, software troubleshooting, or hardware repair quotes.
@@ -407,7 +403,7 @@ const firebaseConfig = {
         6. At the very end of your response, you MUST append this exact hidden tag: [CALLBACK: phone_number | brief_issue_summary].
         Keep responses clear, professional, empathetic, and well-formatted using markdown.`
     };
-    
+
     window.chatHistory = [SYSTEM_PROMPT];
 
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
@@ -415,25 +411,25 @@ const firebaseConfig = {
       <svg class="verified-badge" viewBox="0 0 24 24" aria-label="Verified account">
         <path fill="#1D9BF0" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.827 2.766 2.057 3.465-.056.297-.09.6-.09.914 0 2.21 1.71 4 3.918 4 .556 0 1.082-.114 1.56-.318.572 1.39 1.95 2.37 3.52 2.37s2.948-.98 3.52-2.37c.478.204 1.004.318 1.56.318 2.21 0 3.918-1.79 3.918-4 0-.314-.033-.617-.09-.914 1.23-.698 2.057-2.004 2.057-3.465z"></path>
         <path fill="#FFFFFF" d="M15.34 8.36l-5.8 5.8-2.6-2.6c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4l3.3 3.3c.2.2.5.3.7.3s.5-.1.7-.3l6.5-6.5c.4-.4.4-1 0-1.4s-1-.4-1.4 0z"></path>
-      </svg>
-    `;
+      </svg>`;
 
+    // ─── AUTH HELPERS ─────────────────────────────────────────────────────────────
     window.openAuth = function() {
-      authOverlay.style.display = 'flex';
-      setTimeout(() => {
-        authOverlay.style.opacity = '1';
-        authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(0)' : 'translateY(0)';
-      }, 10);
+        authOverlay.style.display = 'flex';
+        setTimeout(() => {
+            authOverlay.style.opacity     = '1';
+            authContainer.style.transform = 'translateY(0)';
+        }, 10);
     };
 
     window.closeAuth = function() {
-      authOverlay.style.opacity = '0';
-      authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(100%)' : 'translateY(30px)';
-      setTimeout(() => { authOverlay.style.display = 'none'; }, 300);
+        authOverlay.style.opacity     = '0';
+        authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(100%)' : 'translateY(30px)';
+        setTimeout(() => { authOverlay.style.display = 'none'; }, 300);
     };
 
     closeAuthBtn.addEventListener('click', window.closeAuth);
-    authOverlay.addEventListener('click', (e) => { if(e.target === authOverlay) window.closeAuth(); });
+    authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) window.closeAuth(); });
 
     profileBtn.addEventListener('click', () => {
         if (currentUser) {
@@ -451,178 +447,195 @@ const firebaseConfig = {
         try {
             await signInWithPopup(auth, googleProvider);
             window.closeAuth();
-        } catch (error) {
-            window.showDialog("Sign In Failed", "We couldn't sign you in. Please try again.", [ { text: "OK", type: "primary-blue" } ]);
+        } catch {
+            window.showDialog("Sign In Failed", "We couldn't sign you in. Please try again.", [{ text: "OK", type: "primary-blue" }]);
         }
     });
 
-    // --- HELPER TO GET OR CREATE UID ---
+    // ─── UID HELPER ──────────────────────────────────────────────────────────────
+    // Returns authenticated UID or a stable guest ID — never null.
     function getActiveUid() {
         if (currentUser) return currentUser.uid;
-        
         let guestId = localStorage.getItem('guestId');
         if (!guestId) {
             guestId = 'guest_' + Date.now() + Math.floor(Math.random() * 1000);
             localStorage.setItem('guestId', guestId);
         } else if (!guestId.startsWith('guest_')) {
             guestId = 'guest_' + guestId;
+            localStorage.setItem('guestId', guestId);
         }
         return guestId;
     }
 
-    // --- HUMAN CHAT STATE ---
-    let currentHumanStatus = null;
+    // ─── HUMAN CHAT — FIREBASE LISTENERS ─────────────────────────────────────────
+    // Initialised exactly ONCE per page load; guards against duplicate listeners
+    // caused by auth-state re-fires or repeated sign-in/sign-out cycles.
+    let humanListenersInitialized = false;
+    let currentHumanStatus        = null;
 
+    function initHumanChatListeners() {
+        if (humanListenersInitialized) return;
+        humanListenersInitialized = true;
+
+        const uid         = getActiveUid();
+        const messagesRef = ref(db, `human_support/${uid}/messages`);
+        const statusRef   = ref(db, `human_support/${uid}/status`);
+
+        // Track already-rendered keys so re-attaching the listener (e.g. after
+        // page focus restore) doesn't duplicate messages already in the DOM.
+        const seenKeys = new Set();
+
+        // ── onChildAdded replays ALL existing children on first attach,
+        //    then streams new ones in real-time. ──────────────────────────────────
+        onChildAdded(messagesRef, (snapshot) => {
+            if (seenKeys.has(snapshot.key)) return;
+            seenKeys.add(snapshot.key);
+
+            const msg    = snapshot.val();
+            const msgDiv = document.createElement('div');
+            msgDiv.className  = `human-msg ${msg.sender}`;
+            msgDiv.innerText  = msg.text;
+
+            // Remove the "send a message to request…" placeholder on first real message
+            const placeholder = humanChatMessages.querySelector('.human-msg-system[data-placeholder]');
+            if (placeholder) placeholder.remove();
+
+            humanChatMessages.appendChild(msgDiv);
+            humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
+
+            // Badge the FAB if the window is closed and message is from staff
+            if (humanChatWindow.style.display !== 'flex' && msg.sender === 'staff') {
+                chatDot.style.display = 'block';
+            }
+        });
+
+        // ── Status listener: show a system notice when a consultant joins ────────
+        onValue(statusRef, (snap) => {
+            const newStatus = snap.val();
+            if (newStatus === 'active' && currentHumanStatus === 'pending') {
+                const sysDiv       = document.createElement('div');
+                sysDiv.className   = 'human-msg-system';
+                sysDiv.innerText   = '✅ A consultant has accepted your request and joined the chat.';
+                humanChatMessages.appendChild(sysDiv);
+                humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
+            }
+            currentHumanStatus = newStatus;
+        });
+    }
+
+    // ─── AUTH STATE CHANGE ────────────────────────────────────────────────────────
     onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      const avatarImg = document.getElementById('header-avatar');
-      const greetingText = document.getElementById('greetingText');
-      
-      if (user) {
-        avatarImg.src = user.photoURL || DEFAULT_AVATAR;
-        const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
-        greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
-        
-        // Load sidebar chats when authenticated
-        loadSidebarChats(user.uid);
-      } else {
-        avatarImg.src = DEFAULT_AVATAR;
-        greetingText.innerHTML = `Hello there`;
-        sidebarHistoryList.innerHTML = ''; // clear sidebar
-        startNewChat();
-      }
+        currentUser = user;
+        const avatarImg    = document.getElementById('header-avatar');
+        const greetingText = document.getElementById('greetingText');
 
-      // --- Initialize Human Chat Listeners for this session ---
-      const uid = getActiveUid();
-      
-      const humanChatMessages = document.getElementById('humanChatMessages');
-      humanChatMessages.innerHTML = ''; 
-      
-      // Listen for message nodes
-      const messagesRef = ref(db, `human_support/${uid}/messages`);
-      onChildAdded(messagesRef, (data) => {
-          const msg = data.val();
-          const msgDiv = document.createElement('div');
-          msgDiv.className = `human-msg ${msg.sender}`;
-          msgDiv.innerText = msg.text;
-          humanChatMessages.appendChild(msgDiv);
-          humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
-          
-          if (document.getElementById('humanChatWindow').style.display !== 'flex' && msg.sender === 'staff') {
-              document.getElementById('chatDot').style.display = 'block';
-          }
-      });
+        if (user) {
+            avatarImg.src = user.photoURL || DEFAULT_AVATAR;
+            const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
+            greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
+            loadSidebarChats(user.uid);
+        } else {
+            avatarImg.src          = DEFAULT_AVATAR;
+            greetingText.innerHTML = 'Hello there';
+            sidebarHistoryList.innerHTML = '';
+            startNewChat();
+        }
 
-      // Listen for STATUS changes (Pending -> Active)
-      const statusRef = ref(db, `human_support/${uid}/status`);
-      onValue(statusRef, (snap) => {
-          const newStatus = snap.val();
-          if (newStatus === 'active' && currentHumanStatus === 'pending') {
-              // Admin accepted
-              const sysDiv = document.createElement('div');
-              sysDiv.className = 'human-msg-system';
-              sysDiv.innerText = '✅ A consultant has accepted your request and joined the chat.';
-              humanChatMessages.appendChild(sysDiv);
-              humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
-          }
-          currentHumanStatus = newStatus;
-      });
+        // Always attempt to start listeners — the guard inside prevents duplicates.
+        initHumanChatListeners();
     });
 
-    // --- HUMAN CHAT LOGIC ---
-    const humanChatBtn = document.getElementById('humanChatBtn');
-    const humanChatWindow = document.getElementById('humanChatWindow');
-    const closeHumanChat = document.getElementById('closeHumanChat');
-    const humanChatInput = document.getElementById('humanChatInput');
-    const sendHumanMsg = document.getElementById('sendHumanMsg');
-    const chatDot = document.getElementById('chatDot');
-
+    // ─── HUMAN CHAT — UI INTERACTIONS ────────────────────────────────────────────
     humanChatBtn.onclick = () => {
-        humanChatWindow.style.display = humanChatWindow.style.display === 'flex' ? 'none' : 'flex';
+        const isOpen = humanChatWindow.style.display === 'flex';
+        humanChatWindow.style.display = isOpen ? 'none' : 'flex';
         chatDot.style.display = 'none';
-        
-        if(document.getElementById('humanChatMessages').children.length === 0) {
-           document.getElementById('humanChatMessages').innerHTML = '<div class="human-msg-system">Send a message to request a live technician.</div>';
+
+        if (!isOpen) {
+            // Show placeholder only if no messages have loaded yet
+            if (humanChatMessages.children.length === 0) {
+                const placeholder           = document.createElement('div');
+                placeholder.className       = 'human-msg-system';
+                placeholder.dataset.placeholder = 'true';
+                placeholder.innerText       = 'Send a message to request a live technician.';
+                humanChatMessages.appendChild(placeholder);
+            }
+            humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
         }
     };
-    
+
     closeHumanChat.onclick = () => { humanChatWindow.style.display = 'none'; };
 
     async function sendToHuman() {
         const text = humanChatInput.value.trim();
         if (!text) return;
-        
-        // Use our reliable helper to ensure we always have a valid ID
-        const uid = getActiveUid();
-        
+
+        const uid        = getActiveUid();
         const sessionRef = ref(db, `human_support/${uid}`);
-        const chatRef = ref(db, `human_support/${uid}/messages`);
-        
-        // Immediately clear input for a snappy UI feel
+        const chatRef    = ref(db, `human_support/${uid}/messages`);
+
         humanChatInput.value = '';
-        
+
         try {
-            // Push the message to Firebase
+            // 1. Persist the message to Firebase — onChildAdded will render it.
             await push(chatRef, {
-                sender: 'user',
-                text: text,
+                sender:    'user',
+                text:      text,
                 timestamp: serverTimestamp()
             });
-            
-            // Check session status and update to pending if needed
+
+            // 2. Create / update the session metadata.
             const snap = await get(sessionRef);
             const data = snap.val() || {};
-            
+
             if (data.status !== 'active') {
-                // Store some basic info so your admin dashboard knows who is calling
-                await update(sessionRef, { 
-                    status: 'pending', 
-                    timestamp: serverTimestamp(),
+                await update(sessionRef, {
+                    status:      'pending',
+                    timestamp:   serverTimestamp(),
                     displayName: currentUser ? currentUser.displayName : 'Guest',
+                    email:       currentUser ? currentUser.email       : null,
+                    uid:         uid,
                     lastMessage: text
                 });
-                
-                const sysDiv = document.createElement('div');
-                sysDiv.className = 'human-msg-system';
-                sysDiv.innerText = 'Request sent. Waiting for a consultant to join...';
-                document.getElementById('humanChatMessages').appendChild(sysDiv);
-                document.getElementById('humanChatMessages').scrollTop = document.getElementById('humanChatMessages').scrollHeight;
+
+                // Show a one-off "waiting" system notice (not stored in Firebase)
+                const sysDiv       = document.createElement('div');
+                sysDiv.className   = 'human-msg-system';
+                sysDiv.innerText   = 'Request sent. Waiting for a consultant to join…';
+                humanChatMessages.appendChild(sysDiv);
+                humanChatMessages.scrollTop = humanChatMessages.scrollHeight;
             } else {
-                // If active, just update the last message timestamp for the admin dashboard
                 await update(sessionRef, { lastMessageAt: serverTimestamp() });
             }
+
         } catch (error) {
-            console.error("Error saving message to Firebase:", error);
-            const sysDiv = document.createElement('div');
-            sysDiv.className = 'human-msg-system';
-            sysDiv.style.color = 'var(--brand-red)';
-            sysDiv.innerText = 'Failed to send message. Please check your connection.';
-            document.getElementById('humanChatMessages').appendChild(sysDiv);
+            console.error("Error saving human chat message:", error);
+            const errDiv       = document.createElement('div');
+            errDiv.className   = 'human-msg-system';
+            errDiv.style.color = 'var(--brand-red)';
+            errDiv.innerText   = 'Failed to send. Please check your connection.';
+            humanChatMessages.appendChild(errDiv);
         }
     }
 
     sendHumanMsg.onclick = sendToHuman;
-    humanChatInput.onkeypress = (e) => { if(e.key === 'Enter') sendToHuman(); };
+    humanChatInput.onkeypress = (e) => { if (e.key === 'Enter') sendToHuman(); };
 
-    // --- AI CHAT HISTORY / FIREBASE SAVING ---
+    // ─── AI CHAT — SIDEBAR / HISTORY ─────────────────────────────────────────────
     async function loadSidebarChats(uid) {
-        const chatsRef = ref(db, `chats/${uid}`);
-        const snap = await get(chatsRef);
+        const snap = await get(ref(db, `chats/${uid}`));
         sidebarHistoryList.innerHTML = '';
-        
+
         if (snap.exists()) {
             const chats = [];
-            snap.forEach(childSnap => {
-                chats.push({ id: childSnap.key, ...childSnap.val() });
-            });
-            // Sort newest first
+            snap.forEach(child => chats.push({ id: child.key, ...child.val() }));
             chats.sort((a, b) => b.updatedAt - a.updatedAt);
-            
+
             chats.forEach(chat => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `<i data-feather="message-square" style="width: 16px; height: 16px;"></i> ${window.escapeHtml(chat.title || 'New Chat')}`;
-                div.onclick = () => loadSpecificChat(chat.id, uid);
+                const div       = document.createElement('div');
+                div.className   = 'history-item';
+                div.innerHTML   = `<i data-feather="message-square" style="width:16px;height:16px;"></i> ${window.escapeHtml(chat.title || 'New Chat')}`;
+                div.onclick     = () => loadSpecificChat(chat.id, uid);
                 sidebarHistoryList.appendChild(div);
             });
             feather.replace();
@@ -630,132 +643,128 @@ const firebaseConfig = {
     }
 
     async function loadSpecificChat(chatId, uid) {
-        if(window.innerWidth <= 768) sidebar.classList.remove('open');
-        
-        const chatRef = ref(db, `chats/${uid}/${chatId}`);
-        const snap = await get(chatRef);
-        
-        if (snap.exists()) {
-            const chatData = snap.val();
-            currentChatId = chatId;
-            window.chatHistory = chatData.messages || [SYSTEM_PROMPT];
-            
-            // Render UI
-            welcomeScreen.style.display = 'none';
-            chatContainer.style.display = 'flex';
-            chatContainer.innerHTML = '';
-            
-            for (let msg of window.chatHistory) {
-                if (msg.role === 'system') continue;
-                if (msg.role === 'user') {
-                    chatContainer.innerHTML += `
-                        <div class="message-row user">
-                            <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
-                        </div>`;
-                } else if (msg.role === 'assistant') {
-                    const parsedHTML = window.parseMarkdownToHTML(msg.content);
-                    chatContainer.innerHTML += `
-                        <div class="message-row ai">
-                            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar">
-                            <div class="msg-bubble ai">${parsedHTML}</div>
-                        </div>`;
-                }
+        if (window.innerWidth <= 768) sidebar.classList.remove('open');
+
+        const snap = await get(ref(db, `chats/${uid}/${chatId}`));
+        if (!snap.exists()) return;
+
+        const chatData     = snap.val();
+        currentChatId      = chatId;
+        window.chatHistory = chatData.messages || [SYSTEM_PROMPT];
+
+        welcomeScreen.style.display   = 'none';
+        chatContainer.style.display   = 'flex';
+        chatContainer.innerHTML       = '';
+
+        for (const msg of window.chatHistory) {
+            if (msg.role === 'system') continue;
+            if (msg.role === 'user') {
+                chatContainer.innerHTML += `
+                    <div class="message-row user">
+                        <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
+                    </div>`;
+            } else if (msg.role === 'assistant') {
+                chatContainer.innerHTML += `
+                    <div class="message-row ai">
+                        <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar">
+                        <div class="msg-bubble ai">${window.parseMarkdownToHTML(msg.content)}</div>
+                    </div>`;
             }
-            mainScroll.scrollTop = mainScroll.scrollHeight;
         }
+        mainScroll.scrollTop = mainScroll.scrollHeight;
     }
 
     async function saveCurrentChat() {
         if (!currentUser) return;
         const uid = currentUser.uid;
-        
+
         if (!currentChatId) {
-            const newChatRef = push(ref(db, `chats/${uid}`));
-            currentChatId = newChatRef.key;
+            currentChatId = push(ref(db, `chats/${uid}`)).key;
         }
-        
+
         const userMsg = window.chatHistory.find(m => m.role === 'user');
-        let title = "New Conversation";
+        let title     = "New Conversation";
         if (userMsg) {
-            title = userMsg.content.substring(0, 30);
-            if (userMsg.content.length > 30) title += '...';
+            title = userMsg.content.length > 30
+                ? userMsg.content.substring(0, 30) + '…'
+                : userMsg.content;
         }
-        
+
         await set(ref(db, `chats/${uid}/${currentChatId}`), {
-            title: title,
+            title,
             updatedAt: serverTimestamp(),
-            messages: window.chatHistory
+            messages:  window.chatHistory
         });
-        
-        loadSidebarChats(uid); // Refresh sidebar list
+
+        loadSidebarChats(uid);
     }
 
     function startNewChat() {
-        currentChatId = null;
+        currentChatId      = null;
         window.chatHistory = [SYSTEM_PROMPT];
-        chatContainer.innerHTML = '';
-        welcomeScreen.style.display = 'block';
-        chatContainer.style.display = 'none';
+        chatContainer.innerHTML        = '';
+        welcomeScreen.style.display    = 'block';
+        chatContainer.style.display    = 'none';
         if (window.innerWidth <= 768) sidebar.classList.remove('open');
     }
-    
+
     newChatBtn.onclick = startNewChat;
 
-    // --- API KEYS & AI INTERACTION ---
-    const API_BASE = "https://api.x.ai/v1";
-    let XAI_API_KEY = "";
+    // ─── AI CHAT — API ────────────────────────────────────────────────────────────
+    const API_BASE  = "https://api.x.ai/v1";
+    let   XAI_API_KEY = "";
 
     async function loadKey() {
-      try {
-        await fetchAndActivate(remoteConfig);
-        XAI_API_KEY = getValue(remoteConfig, 'xai_api_key').asString();
-      } catch (e) { console.error("Key Load Error", e); }
+        try {
+            await fetchAndActivate(remoteConfig);
+            XAI_API_KEY = getValue(remoteConfig, 'xai_api_key').asString();
+        } catch (e) { console.error("Key Load Error", e); }
     }
     loadKey();
 
-    window.activateChat = function() { 
-        welcomeScreen.style.display = 'none'; 
-        chatContainer.style.display = 'flex'; 
+    window.activateChat = function() {
+        welcomeScreen.style.display  = 'none';
+        chatContainer.style.display  = 'flex';
     };
-    
-    window.setPrompt = function(text) { 
-        userInput.value = text; 
-        window.handleSend(); 
+
+    window.setPrompt = function(text) {
+        userInput.value = text;
+        window.handleSend();
     };
 
     window.escapeHtml = function(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
     };
 
     window.parseMarkdownToHTML = function(text) {
         let html = window.escapeHtml(text);
         html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+        html = html.replace(/^## (.*$)/gim,  '<h2>$1</h2>');
+        html = html.replace(/^# (.*$)/gim,   '<h1>$1</h1>');
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        html = html.replace(/\*(.*?)\*/g,     '<em>$1</em>');
         html = html.replace(/^\s*[-*] (.*$)/gim, '<li>$1</li>');
         html = html.replace(/\n/g, '<br>');
-        html = html.replace(/<\/h1><br>/g, '</h1>');
-        html = html.replace(/<\/h2><br>/g, '</h2>');
-        html = html.replace(/<\/h3><br>/g, '</h3>');
-        html = html.replace(/<\/li><br>/g, '</li>');
+        html = html.replace(/<\/(h1|h2|h3|li)><br>/g, '</$1>');
         return html;
     };
 
     window.typeHTML = async function(element, htmlString, speed = 10) {
         element.innerHTML = '';
-        const parts = htmlString.split(/(<[^>]+>)/g); 
-        for (let part of parts) {
+        const parts = htmlString.split(/(<[^>]+>)/g);
+        for (const part of parts) {
             if (part.startsWith('<')) {
                 element.innerHTML += part;
             } else {
                 for (let i = 0; i < part.length; i++) {
-                    if(part[i] === '&') {
-                        let entityEnd = part.indexOf(';', i);
-                        if(entityEnd !== -1) {
-                            element.innerHTML += part.substring(i, entityEnd + 1);
-                            i = entityEnd;
+                    if (part[i] === '&') {
+                        const end = part.indexOf(';', i);
+                        if (end !== -1) {
+                            element.innerHTML += part.substring(i, end + 1);
+                            i = end;
                             continue;
                         }
                     }
@@ -768,110 +777,104 @@ const firebaseConfig = {
     };
 
     window.handleSend = async function() {
-      const prompt = userInput.value.trim();
-      if (!prompt || !XAI_API_KEY) return;
+        const prompt = userInput.value.trim();
+        if (!prompt || !XAI_API_KEY) return;
 
-      activateChat();
-      
-      chatContainer.innerHTML += `
-        <div class="message-row user">
-            <div class="msg-bubble user">${window.escapeHtml(prompt)}</div>
-        </div>`;
-      
-      const loaderId = 'loader-' + Date.now();
-      chatContainer.innerHTML += `
-        <div class="message-row ai" id="${loaderId}">
-            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
-            <div class="msg-bubble ai">
-                <div class="thinking-container">
-                    Thinking
-                    <div class="loader-inline">
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        window.activateChat();
+
+        chatContainer.innerHTML += `
+            <div class="message-row user">
+                <div class="msg-bubble user">${window.escapeHtml(prompt)}</div>
+            </div>`;
+
+        const loaderId = 'loader-' + Date.now();
+        chatContainer.innerHTML += `
+            <div class="message-row ai" id="${loaderId}">
+                <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
+                <div class="msg-bubble ai">
+                    <div class="thinking-container">
+                        Thinking
+                        <div class="loader-inline">
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>`;
-      
-      userInput.value = '';
-      mainScroll.scrollTop = mainScroll.scrollHeight;
+            </div>`;
 
-      try {
-        chatHistory.push({ role: "user", content: prompt });
-        saveCurrentChat(); // Save user message
-        
-        const res = await fetch(`${API_BASE}/chat/completions`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning", 
-                messages: chatHistory
-            })
-        });
+        userInput.value = '';
+        mainScroll.scrollTop = mainScroll.scrollHeight;
 
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        
-        if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
+        try {
+            window.chatHistory.push({ role: "user", content: prompt });
+            saveCurrentChat();
 
-        let aiMessage = data.choices[0].message.content;
-        
-        // Callback Parsing
-        const callbackRegex = /\[CALLBACK:\s*(.*?)\s*\|\s*(.*?)\]/i;
-        const match = aiMessage.match(callbackRegex);
-        
-        if (match) {
-            const phoneNumber = match[1].trim();
-            const issueSummary = match[2].trim();
-            aiMessage = aiMessage.replace(callbackRegex, '').trim();
-            
-            try {
-                const callbacksRef = ref(db, 'callbacks');
-                await push(callbacksRef, {
-                    phone: phoneNumber,
-                    issue: issueSummary,
-                    uid: currentUser ? currentUser.uid : 'guest',
-                    name: currentUser ? currentUser.displayName : 'Guest User',
-                    status: 'pending',
-                    timestamp: serverTimestamp()
-                });
-                
-                window.showDialog(
-                    "Callback Requested", 
-                    `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
-                    [ { text: "OK", type: "primary-blue" } ]
-                );
-            } catch(e) { console.error("Failed to save callback:", e); }
+            const res = await fetch(`${API_BASE}/chat/completions`, {
+                method:  'POST',
+                headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ model: "grok-4-1-fast-reasoning", messages: window.chatHistory })
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+
+            document.getElementById(loaderId)?.remove();
+
+            let aiMessage = data.choices[0].message.content;
+
+            // ── Callback extraction ──────────────────────────────────────────────
+            const callbackRegex = /\[CALLBACK:\s*(.*?)\s*\|\s*(.*?)\]/i;
+            const match         = aiMessage.match(callbackRegex);
+
+            if (match) {
+                const phoneNumber   = match[1].trim();
+                const issueSummary  = match[2].trim();
+                aiMessage           = aiMessage.replace(callbackRegex, '').trim();
+
+                try {
+                    await push(ref(db, 'callbacks'), {
+                        phone:     phoneNumber,
+                        issue:     issueSummary,
+                        uid:       currentUser ? currentUser.uid  : 'guest',
+                        name:      currentUser ? currentUser.displayName : 'Guest User',
+                        email:     currentUser ? currentUser.email : null,
+                        status:    'pending',
+                        timestamp: serverTimestamp()
+                    });
+
+                    window.showDialog(
+                        "Callback Requested",
+                        `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
+                        [{ text: "OK", type: "primary-blue" }]
+                    );
+                } catch (e) { console.error("Failed to save callback:", e); }
+            }
+
+            window.chatHistory.push({ role: "assistant", content: aiMessage });
+            saveCurrentChat();
+
+            const msgId = 'msg-' + Date.now();
+            chatContainer.innerHTML += `
+                <div class="message-row ai">
+                    <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
+                    <div class="msg-bubble ai" id="${msgId}"></div>
+                </div>`;
+
+            await window.typeHTML(document.getElementById(msgId), window.parseMarkdownToHTML(aiMessage), 10);
+
+        } catch (err) {
+            document.getElementById(loaderId)?.remove();
+            chatContainer.innerHTML += `
+                <div class="message-row ai">
+                    <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
+                    <div class="msg-bubble ai" style="color:var(--brand-red);">Connection Error: ${window.escapeHtml(err.message)}</div>
+                </div>`;
         }
 
-        // Push clean message to history & save
-        chatHistory.push({ role: "assistant", content: aiMessage });
-        saveCurrentChat(); 
-
-        const parsedHTML = window.parseMarkdownToHTML(aiMessage);
-        const messageId = 'msg-' + Date.now();
-        
-        chatContainer.innerHTML += `
-          <div class="message-row ai">
-            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
-            <div class="msg-bubble ai" id="${messageId}"></div>
-          </div>`;
-
-        const targetElement = document.getElementById(messageId);
-        await window.typeHTML(targetElement, parsedHTML, 10); 
-
-      } catch (err) {
-        if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
-        chatContainer.innerHTML += `
-          <div class="message-row ai">
-            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
-            <div class="msg-bubble ai" style="color: var(--brand-red);">Connection Error: ${err.message}</div>
-          </div>`;
-      }
-      mainScroll.scrollTop = mainScroll.scrollHeight;
+        mainScroll.scrollTop = mainScroll.scrollHeight;
     };
 
-    sendBtn.onclick = window.handleSend;
-    userInput.onkeypress = e => { if(e.key === 'Enter') window.handleSend(); };
+    sendBtn.onclick           = window.handleSend;
+    userInput.onkeypress      = e => { if (e.key === 'Enter') window.handleSend(); };
   </script>
 </body>
 </html>
