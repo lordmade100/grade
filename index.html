@@ -3,38 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Ona AI • Art & Vision</title>
+  <title>Rare Grade Tech • Support & Quotes</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet"/>
   <script src="https://unpkg.com/feather-icons"></script>
 
   <style>
     /* ══════════════════════════════════════════
-       THEME SYSTEM
+       THEME SYSTEM (Rare Grade Tech Poster Theme)
     ══════════════════════════════════════════ */
-    :root, [data-theme="light"] {
-        --primary: #6366F1; --primary-dark: #4F46E5; --primary-rgb: 99,102,241;
-        --background: #F8FAFC; --surface: #FFFFFF; --surface2: #F1F5F9; --border: #E2E8F0;
-        --text-primary: #0F172A; --text-secondary: #64748B; --text-muted: #94A3B8;
-    }
-    [data-theme="dark"] {
-        --primary: #818CF8; --primary-dark: #6366F1; --primary-rgb: 129,140,248;
-        --background: #0F172A; --surface: #1E293B; --surface2: #334155; --border: #334155;
-        --text-primary: #F1F5F9; --text-secondary: #94A3B8; --text-muted: #64748B;
-    }
-    [data-theme="midnight"] {
-        --primary: #C084FC; --primary-dark: #A855F7; --primary-rgb: 192,132,252;
-        --background: #09090B; --surface: #18181B; --surface2: #27272A; --border: #3F3F46;
-        --text-primary: #FAFAFA; --text-secondary: #A1A1AA; --text-muted: #71717A;
-    }
-    [data-theme="ocean"] {
-        --primary: #06B6D4; --primary-rgb: 6,182,212; --background: #F0F9FF; --surface: #FFFFFF;
-        --surface2: #E0F2FE; --border: #BAE6FD; --text-primary: #0C4A6E; --text-secondary: #0369A1;
-    }
-    [data-theme="rose"] {
-        --primary: #E11D48; --primary-rgb: 225,29,72; --background: #FFF1F2; --surface: #FFFFFF;
-        --surface2: #FFE4E6; --border: #FECDD3; --text-primary: #881337; --text-secondary: #9F1239;
+    :root {
+        --brand-blue: #0611B1; /* Deep Royal Blue from the poster */
+        --brand-red: #E63946;  /* Red from "IMAGINATION TO REALITY" */
+        --background: #F4F6FA; /* Soft off-white to make the white cards pop */
+        --surface: #FFFFFF;
+        --surface2: #Eef2F6;
+        --border: #D1D5DB;
+        --text-primary: #0F172A;
+        --text-blue: #0611B1;
+        --text-muted: #64748B;
+        --shadow-sm: 0 2px 4px rgba(6, 17, 177, 0.05);
+        --shadow-md: 0 4px 12px rgba(6, 17, 177, 0.08);
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -47,7 +37,6 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: background 0.3s, color 0.3s;
     }
 
     /* Header */
@@ -58,23 +47,27 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--brand-blue);
+      box-shadow: var(--shadow-sm);
       z-index: 10;
-      transition: background 0.3s, border-color 0.3s;
     }
     
     .app-title {
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 1px;
-      font-size: 1.2rem;
-      text-transform: uppercase;
+      font-size: 1.1rem;
+      color: var(--brand-blue);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+    }
+
+    .app-title span {
+      color: var(--brand-red);
     }
 
     .icon-btn {
-      background: none; border: none; color: var(--text-primary);
+      background: none; border: none; color: var(--brand-blue);
       display: flex; align-items: center; justify-content: center;
       width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
     }
@@ -89,81 +82,90 @@
       padding: 30px 20px; text-align: center;
     }
 
+    .brand-logo-large {
+      width: 80px;
+      height: 80px;
+      color: var(--brand-blue);
+      margin-bottom: 16px;
+    }
+
     .brand-title {
-      font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; margin-top: 16px;
+      font-size: 2.2rem; 
+      font-weight: 800; 
+      color: var(--brand-blue);
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .brand-slogan {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--brand-red);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 30px;
     }
 
     .suggestions-container {
-      width: 100%; max-width: 400px; margin-top: 30px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      width: 100%; max-width: 450px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     }
 
     .suggestion-chip {
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 12px; border-radius: 12px; font-size: 0.85rem;
-      text-align: left; cursor: pointer; transition: 0.2s;
+      background: var(--surface); 
+      border: 1px solid var(--border);
+      padding: 16px; 
+      border-radius: 12px; 
+      font-size: 0.9rem;
+      text-align: left; 
+      cursor: pointer; 
+      transition: all 0.2s ease;
       color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .suggestion-chip strong {
+      color: var(--brand-blue);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.95rem;
     }
     
-    .suggestion-chip:active { background: var(--surface2); transform: scale(0.96); }
+    .suggestion-chip:active { 
+      transform: scale(0.96); 
+    }
+    
+    .suggestion-chip:hover {
+      border-color: var(--brand-blue);
+      box-shadow: var(--shadow-md);
+    }
 
     /* Chat Elements */
     .chat-container { padding: 20px; display: none; flex-direction: column; gap: 20px; }
 
     .msg-bubble {
       max-width: 85%; padding: 14px 18px; border-radius: 18px;
-      font-size: 0.95rem; line-height: 1.5;
+      font-size: 0.95rem; line-height: 1.5; box-shadow: var(--shadow-sm);
     }
 
     .message-row { display: flex; flex-direction: column; }
+    
     .message-row.user { align-items: flex-end; }
-    .msg-bubble.user { background: var(--primary); color: white; border-radius: 18px 18px 4px 18px; }
+    .msg-bubble.user { 
+        background: var(--brand-blue); 
+        color: white; 
+        border-radius: 18px 18px 4px 18px; 
+    }
 
     .message-row.ai { align-items: flex-start; }
-    .msg-bubble.ai { background: var(--surface2); color: var(--text-primary); border: 1px solid var(--border); border-radius: 18px 18px 18px 4px; }
-
-    /* --- WATERMARK & IMAGE STYLES --- */
-    .img-wrapper {
-      position: relative;
-      margin-top: 10px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      cursor: zoom-in;
+    .msg-bubble.ai { 
+        background: var(--surface); 
+        color: var(--text-primary); 
+        border: 1px solid var(--border); 
+        border-left: 4px solid var(--brand-red); /* Red accent line */
+        border-radius: 18px 18px 18px 4px; 
     }
-
-    .generated-img {
-      width: 100%;
-      display: block; 
-    }
-
-    .watermark {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.6); 
-      color: white; 
-      padding: 6px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      pointer-events: none; 
-      backdrop-filter: blur(2px); 
-    }
-
-    .action-row { display: flex; gap: 10px; margin-top: 8px; }
-
-    .edit-prompt-btn {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-primary); padding: 6px 14px; border-radius: 20px;
-      font-size: 0.8rem; font-weight: 500; font-family: inherit;
-      cursor: pointer; display: flex; align-items: center; gap: 6px;
-      transition: all 0.2s ease;
-    }
-    .edit-prompt-btn:active { background: var(--surface2); transform: scale(0.97); }
 
     /* Bottom Section */
     .bottom-section {
@@ -171,41 +173,22 @@
       border-top: 1px solid var(--border);
       padding-bottom: env(safe-area-inset-bottom);
       display: flex; flex-direction: column;
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    /* Mode Toggle */
-    .mode-toggle-container {
-      display: flex; justify-content: center; padding: 12px 0 4px 0;
-    }
-
-    .mode-toggle {
-      display: flex; background: var(--surface2);
-      border-radius: 20px; padding: 4px; position: relative; width: 240px; 
-    }
-
-    .toggle-btn {
-      flex: 1; padding: 6px 0; border-radius: 16px; border: none; background: transparent;
-      font-family: inherit; font-size: 0.85rem; font-weight: 600;
-      color: var(--text-secondary); cursor: pointer; z-index: 2; transition: color 0.3s;
-      display: flex; justify-content: center; align-items: center; gap: 4px;
-    }
-
-    .toggle-btn.active { color: white; }
-
-    .toggle-indicator {
-      position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); 
-      background: var(--primary); border-radius: 16px;
-      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index: 1;
     }
 
     /* Input Bar */
-    .input-bar { padding: 10px 20px 15px 20px; }
+    .input-bar { padding: 15px 20px; }
 
     .input-box {
       display: flex; align-items: center; gap: 10px;
       background: var(--surface2); border-radius: 30px; padding: 6px 6px 6px 20px;
-      border: 1px solid var(--border); transition: opacity 0.3s ease;
+      border: 1px solid transparent; 
+      transition: all 0.3s ease;
+    }
+
+    .input-box:focus-within {
+        border-color: var(--brand-blue);
+        background: var(--surface);
+        box-shadow: var(--shadow-sm);
     }
 
     .chat-input {
@@ -217,48 +200,23 @@
 
     .send-btn {
       width: 44px; height: 44px; border-radius: 50%;
-      background: var(--primary); color: white; border: none;
+      background: var(--brand-blue); color: white; border: none;
       display: flex; align-items: center; justify-content: center;
       transition: background 0.2s; cursor: pointer;
     }
 
+    .send-btn:hover {
+        background: var(--brand-red);
+    }
+
     /* Loading */
     .loader { display: flex; gap: 4px; padding: 15px; }
-    .dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: pulse 1.2s infinite; }
+    .dot { width: 6px; height: 6px; background: var(--brand-blue); border-radius: 50%; animation: pulse 1.2s infinite; }
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-    /* Image Viewer Modal */
-    .image-viewer {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(5px);
-      z-index: 1000; display: none; flex-direction: column;
-      align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;
-    }
-
-    .image-viewer img {
-      max-width: 95%; max-height: 85%; border-radius: 8px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5); object-fit: contain;
-    }
-
-    .close-viewer-btn {
-      position: absolute; top: 30px; right: 30px; background: rgba(255, 255, 255, 0.2);
-      border: none; color: white; width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
-    }
-    .close-viewer-btn:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.05); }
-
-    /* Custom Icons */
-    .gemini-icon { width: 24px; height: 24px; }
-    .gemini-icon-large { width: 64px; height: 64px; }
   </style>
-
-  <script>
-      const savedTheme = localStorage.getItem('vynix_theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-  </script>
-
 </head>
 <body>
 
@@ -267,40 +225,44 @@
       <i data-feather="arrow-left"></i>
     </button>
     <div class="app-title">
-        <svg class="gemini-icon" viewBox="0 0 24 24" fill="url(#gemini-gradient)" stroke="none">
-            <defs>
-                <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4A90E2" />
-                    <stop offset="50%" stop-color="#9013FE" />
-                    <stop offset="100%" stop-color="#FF7A59" />
-                </linearGradient>
-            </defs>
-            <path d="M11.5 2C11.5 7.24671 7.24671 11.5 2 11.5C7.24671 11.5 11.5 15.7533 11.5 21C11.5 15.7533 15.7533 11.5 21 11.5C15.7533 11.5 11.5 7.24671 11.5 2Z"></path>
-            <path d="M20 4C20 5.65685 18.6569 7 17 7C18.6569 7 20 8.34315 20 10C20 8.34315 21.3431 7 23 7C21.3431 7 20 5.65685 20 4Z"></path>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 0-7.35 16.76l-.42.42a2 2 0 0 0 2.83 2.83l.42-.42A10 10 0 1 0 12 2z"></path>
+            <path d="M12 8v4l3 3"></path>
         </svg>
-        Ona AI
+        RARE GRADE <span>TECH</span>
     </div>
     <button class="icon-btn" onclick="window.location.href='profile.html'">
-      <img id="header-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23F1F5F9'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">
+      <i data-feather="user"></i>
     </button>
   </header>
 
   <main class="main-content" id="mainScroll">
     <div class="welcome-screen" id="welcomeScreen">
-      <svg class="gemini-icon-large" viewBox="0 0 24 24" fill="url(#gemini-gradient)" stroke="none">
-          <path d="M11.5 2C11.5 7.24671 7.24671 11.5 2 11.5C7.24671 11.5 11.5 15.7533 11.5 21C11.5 15.7533 15.7533 11.5 21 11.5C15.7533 11.5 11.5 7.24671 11.5 2Z"></path>
-          <path d="M20 4C20 5.65685 18.6569 7 17 7C18.6569 7 20 8.34315 20 10C20 8.34315 21.3431 7 23 7C21.3431 7 20 5.65685 20 4Z"></path>
+      <svg class="brand-logo-large" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+        <circle cx="12" cy="12" r="2"></circle>
       </svg>
       
-      <h1 class="brand-title">Ona AI</h1>
-      <p style="color: var(--text-secondary);">Bring your African visions to life.</p>
+      <h1 class="brand-title">Rare Grade Tech</h1>
+      <p class="brand-slogan">Imagination to Reality</p>
       
       <div class="suggestions-container">
-        <div class="suggestion-chip" onclick="setPrompt('African futuristic city with baobab shaped skyscrapers', 'image')">
-          <strong>Futurism</strong><br>Baobab City (Image)
+        <div class="suggestion-chip" onclick="setPrompt('My laptop screen is completely shattered. Can I get a quote to fix it?')">
+          <strong>Repair Quote</strong>
+          Screen Replacement
         </div>
-        <div class="suggestion-chip" onclick="setPrompt('Tell me about the history of African tribal masks', 'chat')">
-          <strong>History</strong><br>Tribal Masks (Chat)
+        <div class="suggestion-chip" onclick="setPrompt('My PC is running extremely slow and freezing. How can I troubleshoot this?')">
+          <strong>Troubleshoot</strong>
+          System Running Slow
+        </div>
+        <div class="suggestion-chip" onclick="setPrompt('I need help installing and configuring some new software for my business.')">
+          <strong>IT Support</strong>
+          Software Setup
+        </div>
+        <div class="suggestion-chip" onclick="setPrompt('My phone keeps dying at 30%. Do I need a new battery? How much would it cost?')">
+          <strong>Hardware Issue</strong>
+          Battery Diagnostics
         </div>
       </div>
     </div>
@@ -309,34 +271,15 @@
   </main>
 
   <footer class="bottom-section">
-    <div class="mode-toggle-container">
-      <div class="mode-toggle">
-        <div class="toggle-indicator" id="toggleIndicator"></div>
-        <button class="toggle-btn active" id="btnChat" onclick="setMode('chat')">
-          <i data-feather="message-circle" style="width:16px;height:16px;"></i> Chat
-        </button>
-        <button class="toggle-btn" id="btnImage" onclick="setMode('image')">
-          <i data-feather="image" style="width:16px;height:16px;"></i> Image
-        </button>
-      </div>
-    </div>
-
     <div class="input-bar">
       <div class="input-box" id="inputBoxContainer">
-        <input type="text" class="chat-input" id="userInput" placeholder="Chat with Ona..." autocomplete="off" />
+        <input type="text" class="chat-input" id="userInput" placeholder="Describe your issue or request a quote..." autocomplete="off" />
         <button class="send-btn" id="sendBtn">
-          <i data-feather="arrow-up" style="width:20px;height:20px;"></i>
+          <i data-feather="send" style="width:18px;height:18px;"></i>
         </button>
       </div>
     </div>
   </footer>
-
-  <div id="imageViewer" class="image-viewer">
-    <button class="close-viewer-btn" onclick="closeImageViewer()">
-      <i data-feather="x"></i>
-    </button>
-    <img id="viewerImage" src="" alt="Expanded View" />
-  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -362,22 +305,6 @@
     const remoteConfig = getRemoteConfig(app);
     remoteConfig.settings.minimumFetchIntervalMillis = 0;
 
-    // --- USER PROFILE LOAD ---
-    const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23F1F5F9'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const snap = await get(ref(db, `users/${user.uid}`));
-          if (snap.exists()) {
-            document.getElementById('header-avatar').src = snap.val().photoURL || DEFAULT_AVATAR;
-          }
-        } catch(e) { console.error("Avatar load error", e); }
-      } else {
-        window.location.href = 'signup.html';
-      }
-    });
-
     // --- API KEYS ---
     const API_BASE = "https://api.x.ai/v1";
     let XAI_API_KEY = "";
@@ -391,9 +318,11 @@
     loadKey();
 
     // --- STATE & UI LOGIC ---
-    window.currentMode = 'chat'; // Default mode
     window.chatHistory = [
-        { role: "system", content: "You are Ona AI, an inspiring and creative assistant focused on African art, vision, and culture. Be helpful, concise, and enthusiastic." }
+        { 
+            role: "system", 
+            content: "You are Rare Grade Tech AI, an expert technical support and IT repair consultant. Your slogan is 'Imagination to Reality'. Your goal is to help clients troubleshoot basic technical software issues, and to provide professional, estimated quotes for hardware repairs or complex IT services. If a user asks for a repair quote, ensure you ask for the specific device make, model, and the exact nature of the issue before giving an estimated price. Keep your responses professional, incredibly helpful, clear, and concise." 
+        }
     ];
 
     const els = {
@@ -401,36 +330,15 @@
       chat: document.getElementById('chatContainer'),
       input: document.getElementById('userInput'),
       send: document.getElementById('sendBtn'),
-      scroll: document.getElementById('mainScroll'),
-      indicator: document.getElementById('toggleIndicator'),
-      btnChat: document.getElementById('btnChat'),
-      btnImage: document.getElementById('btnImage'),
-      inputBox: document.getElementById('inputBoxContainer'),
-      viewer: document.getElementById('imageViewer'),
-      viewerImg: document.getElementById('viewerImage')
+      scroll: document.getElementById('mainScroll')
     };
 
-    window.setMode = function(mode) {
-      window.currentMode = mode;
-      
-      els.btnChat.classList.remove('active');
-      els.btnImage.classList.remove('active');
-
-      if (mode === 'chat') {
-        els.indicator.style.transform = 'translateX(0)';
-        els.btnChat.classList.add('active');
-        els.input.placeholder = "Chat with Ona...";
-      } else if (mode === 'image') {
-        els.indicator.style.transform = 'translateX(100%)';
-        els.btnImage.classList.add('active');
-        els.input.placeholder = "Describe an image...";
-      }
+    window.activateChat = function() { 
+        els.welcome.style.display = 'none'; 
+        els.chat.style.display = 'flex'; 
     };
-
-    window.activateChat = function() { els.welcome.style.display = 'none'; els.chat.style.display = 'flex'; };
     
-    window.setPrompt = function(text, modeTarget) { 
-        if (window.currentMode !== modeTarget) setMode(modeTarget);
+    window.setPrompt = function(text) { 
         els.input.value = text; 
         handleSend(); 
     };
@@ -444,38 +352,6 @@
         formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         formatted = formatted.replace(/\n/g, '<br>');
         return formatted;
-    };
-
-    // --- IMAGE VIEWER LOGIC ---
-    window.openImageViewer = function(url) {
-      els.viewerImg.src = url;
-      els.viewer.style.display = 'flex';
-      setTimeout(() => { els.viewer.style.opacity = '1'; }, 10);
-    };
-
-    window.closeImageViewer = function() {
-      els.viewer.style.opacity = '0';
-      setTimeout(() => { els.viewer.style.display = 'none'; els.viewerImg.src = ''; }, 300);
-    };
-
-    window.editPrompt = function(encodedPrompt) {
-      const promptText = decodeURIComponent(encodedPrompt);
-      if(window.currentMode !== 'image') setMode('image');
-      els.input.value = promptText;
-      els.input.focus();
-    };
-
-    // --- HANDLE CONTEXT FROM FEED ---
-    window.onload = () => {
-        const ctxRaw = sessionStorage.getItem('vynix_ai_context');
-        if (ctxRaw) {
-            try {
-                const ctx = JSON.parse(ctxRaw);
-                let promptText = `Analyze this post by @${ctx.author}:\n"${ctx.text}"`;
-                els.input.value = promptText;
-                sessionStorage.removeItem('vynix_ai_context');
-            } catch(e){}
-        }
     };
 
     window.handleSend = async function() {
@@ -494,72 +370,32 @@
       els.scroll.scrollTop = els.scroll.scrollHeight;
 
       try {
-        if (window.currentMode === 'chat') {
-            chatHistory.push({ role: "user", content: prompt });
-            
-            const res = await fetch(`${API_BASE}/chat/completions`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: "grok-4-1-fast-reasoning",
-                    messages: chatHistory
-                })
-            });
+        chatHistory.push({ role: "user", content: prompt });
+        
+        const res = await fetch(`${API_BASE}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                messages: chatHistory
+            })
+        });
 
-            if (!res.ok) throw new Error(await res.text());
-            const data = await res.json();
-            loader.remove();
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        loader.remove();
 
-            const aiMessage = data.choices[0].message.content;
-            chatHistory.push({ role: "assistant", content: aiMessage });
+        const aiMessage = data.choices[0].message.content;
+        chatHistory.push({ role: "assistant", content: aiMessage });
 
-            els.chat.innerHTML += `
-              <div class="message-row ai">
-                <div class="msg-bubble ai">${window.formatChatText(aiMessage)}</div>
-              </div>`;
+        els.chat.innerHTML += `
+          <div class="message-row ai">
+            <div class="msg-bubble ai">${window.formatChatText(aiMessage)}</div>
+          </div>`;
 
-        } else if (window.currentMode === 'image') {
-            const res = await fetch(`${API_BASE}/images/generations`, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ model: "grok-imagine-image", prompt: prompt })
-            });
-
-            if (!res.ok) throw new Error(await res.text());
-            const data = await res.json();
-            loader.remove();
-
-            if (data.data && data.data[0].url) {
-              const url = data.data[0].url;
-              const encodedPrompt = encodeURIComponent(prompt);
-              
-              const sparkIcon = `<svg class="gemini-icon" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="url(#gemini-gradient)" stroke="none"><path d="M11.5 2C11.5 7.24671 7.24671 11.5 2 11.5C7.24671 11.5 11.5 15.7533 11.5 21C11.5 15.7533 15.7533 11.5 21 11.5C15.7533 11.5 11.5 7.24671 11.5 2Z"></path><path d="M20 4C20 5.65685 18.6569 7 17 7C18.6569 7 20 8.34315 20 10C20 8.34315 21.3431 7 23 7C21.3431 7 20 5.65685 20 4Z"></path></svg>`;
-
-              els.chat.innerHTML += `
-              <div class="message-row ai">
-                <div style="display:flex; flex-direction:column; align-items:flex-start; max-width:85%;">
-                  <div class="msg-bubble ai" style="max-width:100%;">Your image is ready:</div>
-                  
-                  <div class="img-wrapper" onclick="openImageViewer('${url}')">
-                    <img src="${url}" class="generated-img">
-                    <div class="watermark">
-                      ${sparkIcon} Ona AI
-                    </div>
-                  </div>
-                  
-                  <div class="action-row">
-                    <button class="edit-prompt-btn" onclick="editPrompt('${encodedPrompt}')">
-                      <i data-feather="edit-2" style="width:14px;height:14px;"></i> Edit Prompt
-                    </button>
-                  </div>
-                </div>
-              </div>`;
-              feather.replace();
-            }
-        }
       } catch (err) {
         loader.remove();
-        els.chat.innerHTML += `<div class="message-row ai"><div class="msg-bubble ai" style="color:var(--like);">Error: ${err.message}</div></div>`;
+        els.chat.innerHTML += `<div class="message-row ai"><div class="msg-bubble ai" style="color: var(--brand-red); border-color: var(--brand-red);">Error: ${err.message}</div></div>`;
       }
       els.scroll.scrollTop = els.scroll.scrollHeight;
     };
