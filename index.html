@@ -164,7 +164,6 @@
       max-width: 800px;
       display: flex;
       flex-direction: column;
-      position: relative;
     }
 
     /* Welcome Screen */
@@ -266,24 +265,6 @@
     .suggestion-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
     .suggestion-card .icon { align-self: flex-end; background: #FFFFFF; padding: 8px; border-radius: 50%; display: flex; }
 
-    /* ════ LIVE AGENT BANNER ════ */
-    .live-agent-banner {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: var(--brand-blue);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      font-weight: 500;
-      font-size: 0.9rem;
-      animation: slideDown 0.3s ease;
-    }
-    .live-agent-banner i { width: 16px; height: 16px; }
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
     /* Chat Area */
     .chat-container { display: none; flex-direction: column; gap: 24px; padding-top: 20px; }
 
@@ -304,11 +285,7 @@
     .ai-avatar {
       width: 36px; height: 36px; flex-shrink: 0;
       border-radius: 50%; object-fit: contain;
-      background: var(--brand-blue);
-      color: white;
-      display: flex; align-items: center; justify-content: center; font-weight: bold;
     }
-    
     .msg-bubble.ai {
       padding: 4px 0;
       font-size: 1rem;
@@ -317,15 +294,8 @@
       line-height: 1.6;
     }
     
-    .msg-bubble.ai.human-reply {
-        background: #E3E3E3;
-        padding: 12px 20px;
-        border-radius: 0 24px 24px 24px;
-    }
-
     /* Markdown Styling */
     .msg-bubble.ai p { margin-bottom: 12px; }
-    .msg-bubble.ai p:last-child { margin-bottom: 0; }
     .msg-bubble.ai h1, .msg-bubble.ai h2, .msg-bubble.ai h3 { 
       margin-top: 16px; margin-bottom: 8px; color: var(--brand-blue); font-weight: 700;
     }
@@ -535,11 +505,11 @@
                   <div class="icon"><i data-feather="monitor" style="width:18px;height:18px;color:#d96570;"></i></div>
               </div>
             </div>
-            <div class="suggestion-card" onclick="setPrompt('I would like to chat with a human consultant please.')">
+            <div class="suggestion-card" onclick="setPrompt('My laptop keeps turning off randomly. What could be the issue?')">
               <div class="water-drops"></div>
               <div class="card-content">
-                  <p>Chat with a live support consultant</p>
-                  <div class="icon"><i data-feather="headphones" style="width:18px;height:18px;color:#fbbc04;"></i></div>
+                  <p>Diagnose sudden power or battery issues</p>
+                  <div class="icon"><i data-feather="battery-charging" style="width:18px;height:18px;color:#fbbc04;"></i></div>
               </div>
             </div>
             <div class="suggestion-card" onclick="setPrompt('How do I remove a virus or malware from my Windows PC?')">
@@ -552,9 +522,6 @@
           </div>
         </div>
 
-        <div class="live-agent-banner" id="liveAgentBanner">
-            <i data-feather="user-check"></i> Connected to Live Support
-        </div>
         <div class="chat-container" id="chatContainer"></div>
 
       </div>
@@ -562,7 +529,7 @@
 
     <div class="input-wrapper">
       <div class="input-box">
-        <input type="text" class="chat-input" id="userInput" placeholder="Ask Steward or a consultant here..." autocomplete="off" />
+        <input type="text" class="chat-input" id="userInput" placeholder="Ask Steward about computer repairs or support here..." autocomplete="off" />
         <button class="action-btn" id="sendBtn">
           <i data-feather="send" style="width:20px;height:20px;"></i>
         </button>
@@ -573,7 +540,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, get, push, set, update, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getRemoteConfig, fetchAndActivate, getValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-remote-config.js";
 
     // Initialize Icons
@@ -589,7 +556,6 @@
     const mainScroll = document.getElementById('mainScroll');
     const newChatBtn = document.getElementById('newChatBtn');
     const sidebarHistoryList = document.getElementById('sidebarHistoryList');
-    const liveAgentBanner = document.getElementById('liveAgentBanner');
 
     menuToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
     document.addEventListener('click', (e) => {
@@ -682,8 +648,6 @@
     
     let currentUser = null;
     let currentChatId = null; 
-    let currentChatMode = 'ai'; // 'ai' or 'human'
-    let unsubscribeDbListener = null;
 
     const SYSTEM_PROMPT = { 
         role: "system", 
@@ -691,8 +655,10 @@
         YOUR GOALS:
         1. Greet users warmly and proactively drive the conversation toward assisting with computer-related tech support, software troubleshooting, or hardware repair quotes.
         2. If a user asks about non-computer topics, politely decline and provide the support number: +27 0800 123 456.
-        3. HANDOVER PROTOCOL: If the user explicitly asks to speak to a human, a real person, a consultant, or an agent, you MUST immediately agree and append this EXACT hidden tag at the very end of your response: [HANDOVER].
-        4. CALLBACK PROTOCOL: If a user requests a phone call back, ask for their phone number. Once provided, append this tag: [CALLBACK: phone_number | brief_issue_summary].
+        3. CALLBACK FEATURE: Always let users know they can request a "call back" or phone call if their issue is complex or they want a direct quote. 
+        4. If a user requests a call back, ask for their phone number and a brief summary of their issue.
+        5. Once they provide their phone number, you MUST explicitly reply in the chat with feedback letting the client know that their details have been sent to the admin team and an agent will call them back shortly.
+        6. At the very end of your response, you MUST append this exact hidden tag: [CALLBACK: phone_number | brief_issue_summary].
         Keep responses clear, professional, empathetic, and well-formatted using markdown.`
     };
     
@@ -754,99 +720,75 @@
         const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
         greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
         
+        // Load sidebar chats when authenticated
         loadSidebarChats(user.uid);
       } else {
         avatarImg.src = DEFAULT_AVATAR;
         greetingText.innerHTML = `Hello there`;
-        sidebarHistoryList.innerHTML = '';
+        sidebarHistoryList.innerHTML = ''; // clear sidebar
         startNewChat();
       }
     });
 
-    // --- CHAT HISTORY / FIREBASE REALTIME LISTENER ---
+    // --- CHAT HISTORY / FIREBASE SAVING ---
     async function loadSidebarChats(uid) {
         const chatsRef = ref(db, `chats/${uid}`);
-        onValue(chatsRef, (snap) => {
-            sidebarHistoryList.innerHTML = '';
-            if (snap.exists()) {
-                const chats = [];
-                snap.forEach(childSnap => {
-                    chats.push({ id: childSnap.key, ...childSnap.val() });
-                });
-                chats.sort((a, b) => b.updatedAt - a.updatedAt);
-                
-                chats.forEach(chat => {
-                    const div = document.createElement('div');
-                    div.className = 'history-item';
-                    div.innerHTML = `<i data-feather="message-square" style="width: 16px; height: 16px;"></i> ${window.escapeHtml(chat.title || 'New Chat')}`;
-                    div.onclick = () => loadSpecificChat(chat.id, uid);
-                    sidebarHistoryList.appendChild(div);
-                });
-                feather.replace();
-            }
-        });
-    }
-
-    function renderMessagesFromHistory() {
-        chatContainer.innerHTML = '';
-        for (let msg of window.chatHistory) {
-            if (msg.role === 'system') continue;
+        const snap = await get(chatsRef);
+        sidebarHistoryList.innerHTML = '';
+        
+        if (snap.exists()) {
+            const chats = [];
+            snap.forEach(childSnap => {
+                chats.push({ id: childSnap.key, ...childSnap.val() });
+            });
+            // Sort newest first
+            chats.sort((a, b) => b.updatedAt - a.updatedAt);
             
-            if (msg.role === 'user') {
-                chatContainer.innerHTML += `
-                    <div class="message-row user">
-                        <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
-                    </div>`;
-            } else if (msg.role === 'assistant') {
-                const parsedHTML = window.parseMarkdownToHTML(msg.content);
-                chatContainer.innerHTML += `
-                    <div class="message-row ai">
-                        <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar">
-                        <div class="msg-bubble ai">${parsedHTML}</div>
-                    </div>`;
-            } else if (msg.role === 'human_agent') {
-                 // Format for a real human agent replying from admin dash
-                 const parsedHTML = window.parseMarkdownToHTML(msg.content);
-                 chatContainer.innerHTML += `
-                    <div class="message-row ai">
-                        <div class="ai-avatar"><i data-feather="user"></i></div>
-                        <div class="msg-bubble ai human-reply">${parsedHTML}</div>
-                    </div>`;
-            }
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `<i data-feather="message-square" style="width: 16px; height: 16px;"></i> ${window.escapeHtml(chat.title || 'New Chat')}`;
+                div.onclick = () => loadSpecificChat(chat.id, uid);
+                sidebarHistoryList.appendChild(div);
+            });
+            feather.replace();
         }
-        feather.replace();
-        mainScroll.scrollTop = mainScroll.scrollHeight;
     }
 
     async function loadSpecificChat(chatId, uid) {
         if(window.innerWidth <= 768) sidebar.classList.remove('open');
         
-        if(unsubscribeDbListener) unsubscribeDbListener(); // Detach old listener
-        
-        currentChatId = chatId;
         const chatRef = ref(db, `chats/${uid}/${chatId}`);
+        const snap = await get(chatRef);
         
-        // Listen dynamically for updates (like an admin replying)
-        unsubscribeDbListener = onValue(chatRef, (snap) => {
-            if (snap.exists()) {
-                const chatData = snap.val();
-                window.chatHistory = chatData.messages || [SYSTEM_PROMPT];
-                currentChatMode = chatData.mode || 'ai';
-                
-                welcomeScreen.style.display = 'none';
-                chatContainer.style.display = 'flex';
-                
-                if (currentChatMode === 'human') {
-                    liveAgentBanner.style.display = 'flex';
-                    userInput.placeholder = "Reply to human consultant...";
-                } else {
-                    liveAgentBanner.style.display = 'none';
-                    userInput.placeholder = "Ask Steward about computer repairs...";
+        if (snap.exists()) {
+            const chatData = snap.val();
+            currentChatId = chatId;
+            window.chatHistory = chatData.messages || [SYSTEM_PROMPT];
+            
+            // Render UI
+            welcomeScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            chatContainer.innerHTML = '';
+            
+            for (let msg of window.chatHistory) {
+                if (msg.role === 'system') continue;
+                if (msg.role === 'user') {
+                    chatContainer.innerHTML += `
+                        <div class="message-row user">
+                            <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
+                        </div>`;
+                } else if (msg.role === 'assistant') {
+                    const parsedHTML = window.parseMarkdownToHTML(msg.content);
+                    chatContainer.innerHTML += `
+                        <div class="message-row ai">
+                            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar">
+                            <div class="msg-bubble ai">${parsedHTML}</div>
+                        </div>`;
                 }
-                
-                renderMessagesFromHistory();
             }
-        });
+            mainScroll.scrollTop = mainScroll.scrollHeight;
+        }
     }
 
     async function saveCurrentChat() {
@@ -856,9 +798,6 @@
         if (!currentChatId) {
             const newChatRef = push(ref(db, `chats/${uid}`));
             currentChatId = newChatRef.key;
-            
-            // Attach listener to newly created chat
-            loadSpecificChat(currentChatId, uid);
         }
         
         const userMsg = window.chatHistory.find(m => m.role === 'user');
@@ -868,26 +807,21 @@
             if (userMsg.content.length > 30) title += '...';
         }
         
-        await update(ref(db, `chats/${uid}/${currentChatId}`), {
+        await set(ref(db, `chats/${uid}/${currentChatId}`), {
             title: title,
             updatedAt: serverTimestamp(),
-            mode: currentChatMode,
             messages: window.chatHistory
         });
+        
+        loadSidebarChats(uid); // Refresh sidebar list
     }
 
     function startNewChat() {
-        if(unsubscribeDbListener) unsubscribeDbListener();
         currentChatId = null;
-        currentChatMode = 'ai';
         window.chatHistory = [SYSTEM_PROMPT];
-        
         chatContainer.innerHTML = '';
         welcomeScreen.style.display = 'block';
         chatContainer.style.display = 'none';
-        liveAgentBanner.style.display = 'none';
-        userInput.placeholder = "Ask Steward about computer repairs...";
-        
         if (window.innerWidth <= 768) sidebar.classList.remove('open');
     }
     
@@ -961,36 +895,14 @@
 
     window.handleSend = async function() {
       const prompt = userInput.value.trim();
-      if (!prompt) return;
-
-      // If user isn't logged in, block them from chatting with human specifically
-      if (currentChatMode === 'human' && !currentUser) {
-          window.openAuth();
-          return;
-      }
+      if (!prompt || !XAI_API_KEY) return;
 
       activateChat();
       
-      // Temporarily render user message immediately for responsiveness
       chatContainer.innerHTML += `
         <div class="message-row user">
             <div class="msg-bubble user">${window.escapeHtml(prompt)}</div>
         </div>`;
-        
-      userInput.value = '';
-      mainScroll.scrollTop = mainScroll.scrollHeight;
-
-      // Push to history
-      chatHistory.push({ role: "user", content: prompt });
-      
-      // If we are in human mode, just save to DB and STOP. AI does not reply. Admin will reply via DB sync.
-      if (currentChatMode === 'human') {
-          await saveCurrentChat();
-          return; 
-      }
-
-      // ─── AI MODE LOGIC ───
-      if (!XAI_API_KEY) return;
       
       const loaderId = 'loader-' + Date.now();
       chatContainer.innerHTML += `
@@ -1005,10 +917,13 @@
                 </div>
             </div>
         </div>`;
+      
+      userInput.value = '';
       mainScroll.scrollTop = mainScroll.scrollHeight;
 
       try {
-        await saveCurrentChat(); 
+        chatHistory.push({ role: "user", content: prompt });
+        saveCurrentChat(); // Save user message
         
         const res = await fetch(`${API_BASE}/chat/completions`, {
             method: 'POST',
@@ -1026,30 +941,18 @@
 
         let aiMessage = data.choices[0].message.content;
         
-        // --- HANDOVER PARSER LOGIC ---
-        if (aiMessage.includes('[HANDOVER]')) {
-            aiMessage = aiMessage.replace('[HANDOVER]', '').trim();
-            currentChatMode = 'human'; // Mute AI globally for this chat
-            
-            if (!currentUser) {
-                aiMessage += "\n\n**Please sign in using the icon at the top right so our consultants can reach you securely.**";
-            } else {
-                aiMessage += "\n\n**Transferring you to a live support consultant now. They will reply in this chat window shortly.**";
-                liveAgentBanner.style.display = 'flex';
-                document.getElementById('userInput').placeholder = "Reply to human consultant...";
-            }
-        }
-
-        // --- CALLBACK PARSER LOGIC ---
+        // Callback Parsing
         const callbackRegex = /\[CALLBACK:\s*(.*?)\s*\|\s*(.*?)\]/i;
         const match = aiMessage.match(callbackRegex);
+        
         if (match) {
             const phoneNumber = match[1].trim();
             const issueSummary = match[2].trim();
             aiMessage = aiMessage.replace(callbackRegex, '').trim();
             
             try {
-                await push(ref(db, 'callbacks'), {
+                const callbacksRef = ref(db, 'callbacks');
+                await push(callbacksRef, {
                     phone: phoneNumber,
                     issue: issueSummary,
                     uid: currentUser ? currentUser.uid : 'guest',
@@ -1057,32 +960,30 @@
                     status: 'pending',
                     timestamp: serverTimestamp()
                 });
-                window.showDialog("Callback Requested", `We have sent your request. An agent will call you at ${phoneNumber}.`, [ { text: "OK", type: "primary-blue" } ]);
+                
+                window.showDialog(
+                    "Callback Requested", 
+                    `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
+                    [ { text: "OK", type: "primary-blue" } ]
+                );
             } catch(e) { console.error("Failed to save callback:", e); }
         }
 
-        // Push AI reply to history & save
+        // Push clean message to history & save
         chatHistory.push({ role: "assistant", content: aiMessage });
-        await saveCurrentChat(); 
+        saveCurrentChat(); 
 
-        // The onValue DB listener will naturally trigger a re-render here, 
-        // but to ensure smooth typing effect, we bypass the full re-render temporarily if we just typed
-        // Actually, the DB listener resets the innerHTML, breaking the typing effect. 
-        // Let's detach listener temporarily, type, then re-attach.
-        if(unsubscribeDbListener) unsubscribeDbListener();
-        
-        renderMessagesFromHistory(); // sync clean state
-        
-        // Target the last message to apply typing effect
-        const msgRows = chatContainer.querySelectorAll('.message-row.ai .msg-bubble.ai');
-        const targetElement = msgRows[msgRows.length - 1];
         const parsedHTML = window.parseMarkdownToHTML(aiMessage);
-        await window.typeHTML(targetElement, parsedHTML, 10); 
+        const messageId = 'msg-' + Date.now();
         
-        // Reattach listener after typing
-        if(currentUser && currentChatId) {
-            loadSpecificChat(currentChatId, currentUser.uid);
-        }
+        chatContainer.innerHTML += `
+          <div class="message-row ai">
+            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
+            <div class="msg-bubble ai" id="${messageId}"></div>
+          </div>`;
+
+        const targetElement = document.getElementById(messageId);
+        await window.typeHTML(targetElement, parsedHTML, 10); 
 
       } catch (err) {
         if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
