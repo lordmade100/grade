@@ -129,13 +129,21 @@
       height: 48px; 
       object-fit: contain;
     }
+    
+    .profile-btn {
+      background: none; border: none; padding: 0; cursor: pointer;
+      border-radius: 50%; transition: transform 0.2s;
+    }
+    .profile-btn:hover { transform: scale(1.05); }
 
     .header-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 38px; height: 38px; border-radius: 50%;
       background: var(--brand-blue); color: white;
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 1rem; object-fit: cover;
+      border: 2px solid transparent; transition: border-color 0.2s;
     }
+    .profile-btn:hover .header-avatar { border-color: var(--border-color); }
 
     /* Scroll Area */
     .scroll-area {
@@ -305,11 +313,45 @@
     }
     .action-btn:hover { background: rgba(0,0,0,0.05); }
 
+    /* ════ AUTH MODAL / BOTTOM SHEET ════ */
+    .auth-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+
+    .auth-container {
+      background: var(--bg-main); padding: 40px 30px; border-radius: 24px;
+      width: 90%; max-width: 420px; text-align: center; position: relative;
+      transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .close-auth-btn {
+      position: absolute; top: 16px; right: 16px; background: none; border: none;
+      cursor: pointer; color: var(--text-secondary); padding: 8px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .close-auth-btn:hover { background: var(--bg-input); }
+
+    .auth-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+    .auth-subtitle { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 30px; line-height: 1.5; }
+
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 14px; background: white; border: 1px solid var(--border-color);
+      border-radius: 50px; font-family: inherit; font-size: 1rem; font-weight: 500;
+      cursor: pointer; color: var(--text-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .google-btn:hover { background: #f8f9fa; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .google-btn img { width: 24px; height: 24px; }
+
     /* ════ RESPONSIVE ════ */
     @media (max-width: 768px) {
       .sidebar {
-        position: fixed;
-        left: 0; top: 0; bottom: 0;
+        position: fixed; left: 0; top: 0; bottom: 0;
         transform: translateX(-100%);
       }
       .sidebar.open { transform: translateX(0); box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
@@ -317,10 +359,33 @@
       .greeting, .subtitle { font-size: 2.2rem; }
       .welcome-screen { margin-top: 5vh; }
       .input-wrapper { padding: 10px 15px 15px 15px; background: var(--bg-main); }
+      
+      /* Bottom Sheet styling for mobile */
+      .auth-overlay { align-items: flex-end; }
+      .auth-container {
+        width: 100%; max-width: 100%; border-radius: 28px 28px 0 0;
+        transform: translateY(100%); padding-bottom: calc(40px + env(safe-area-inset-bottom));
+      }
     }
   </style>
 </head>
 <body>
+
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-container" id="authContainer">
+      <button class="close-auth-btn" id="closeAuthBtn">
+        <i data-feather="x" style="width:20px;height:20px;"></i>
+      </button>
+      <img src="https://i.postimg.cc/XqY9mvWs/4.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
+      <h2 class="auth-title">Welcome to Rare Grade Tech</h2>
+      <p class="auth-subtitle">Sign in to request repair quotes and receive personalized IT support.</p>
+      
+      <button class="google-btn" id="googleSignInBtn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+      </button>
+    </div>
+  </div>
 
   <aside class="sidebar" id="sidebar">
     <button class="new-chat-btn" onclick="location.reload()">
@@ -349,14 +414,17 @@
         </button>
         <img src="https://i.postimg.cc/XqY9mvWs/4.png" alt="Rare Grade Tech" class="brand-logo">
       </div>
-      <img id="header-avatar" class="header-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%230611B1'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E">
+      
+      <button class="profile-btn" id="profileBtn">
+        <img id="header-avatar" class="header-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E">
+      </button>
     </header>
 
     <div class="scroll-area" id="mainScroll">
       <div class="content-container">
         
         <div class="welcome-screen" id="welcomeScreen">
-          <h1 class="greeting">Hello, Katlego</h1>
+          <h1 class="greeting" id="greetingText">Hello there</h1>
           <h2 class="subtitle">How can I help with your PC today?</h2>
           
           <div class="suggestions-grid">
@@ -396,7 +464,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getRemoteConfig, fetchAndActivate, getValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-remote-config.js";
 
@@ -434,14 +502,72 @@
     const remoteConfig = getRemoteConfig(app);
     remoteConfig.settings.minimumFetchIntervalMillis = 0;
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
+    // --- AUTHENTICATION UI LOGIC ---
+    const authOverlay = document.getElementById('authOverlay');
+    const authContainer = document.getElementById('authContainer');
+    const closeAuthBtn = document.getElementById('closeAuthBtn');
+    const profileBtn = document.getElementById('profileBtn');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    
+    let currentUser = null;
+    const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+
+    window.openAuth = function() {
+      authOverlay.style.display = 'flex';
+      setTimeout(() => {
+        authOverlay.style.opacity = '1';
+        authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(0)' : 'translateY(0)';
+      }, 10);
+    };
+
+    window.closeAuth = function() {
+      authOverlay.style.opacity = '0';
+      authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(100%)' : 'translateY(30px)';
+      setTimeout(() => { authOverlay.style.display = 'none'; }, 300);
+    };
+
+    closeAuthBtn.addEventListener('click', closeAuth);
+    
+    // Close modal if clicked outside container
+    authOverlay.addEventListener('click', (e) => {
+        if(e.target === authOverlay) closeAuth();
+    });
+
+    profileBtn.addEventListener('click', () => {
+        if (currentUser) {
+            if(confirm("Do you want to sign out of Rare Grade Tech?")) {
+                signOut(auth);
+            }
+        } else {
+            openAuth();
+        }
+    });
+
+    const googleProvider = new GoogleAuthProvider();
+    googleSignInBtn.addEventListener('click', async () => {
         try {
-          const snap = await get(ref(db, `users/${user.uid}`));
-          if (snap.exists() && snap.val().photoURL) {
-            document.getElementById('header-avatar').src = snap.val().photoURL;
-          }
-        } catch(e) { console.error("Avatar load error", e); }
+            await signInWithPopup(auth, googleProvider);
+            closeAuth();
+        } catch (error) {
+            console.error("Sign-in error:", error);
+            alert("Failed to sign in. Please try again.");
+        }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const avatarImg = document.getElementById('header-avatar');
+      const greetingText = document.getElementById('greetingText');
+      
+      if (user) {
+        // Fetch higher-res photo if available, fallback to provider photo
+        avatarImg.src = user.photoURL || DEFAULT_AVATAR;
+        greetingText.innerText = `Hello, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}`;
+      } else {
+        avatarImg.src = DEFAULT_AVATAR;
+        greetingText.innerText = `Hello there`;
+        // Optionally open auth modal automatically for logged-out users:
+        // setTimeout(openAuth, 1000); 
       }
     });
 
@@ -480,45 +606,29 @@
     // --- MARKDOWN PARSER ---
     window.parseMarkdownToHTML = function(text) {
         let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        
-        // Headers (### Header)
         html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
         html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
         html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-        
-        // Bold (**text**)
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Italics (*text*)
         html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Lists (- item or * item)
         html = html.replace(/^\s*[-*] (.*$)/gim, '<li>$1</li>');
-        
-        // Paragraphs / Line Breaks (Replace newlines with <br> unless they follow a block tag)
         html = html.replace(/\n/g, '<br>');
         html = html.replace(/<\/h1><br>/g, '</h1>');
         html = html.replace(/<\/h2><br>/g, '</h2>');
         html = html.replace(/<\/h3><br>/g, '</h3>');
         html = html.replace(/<\/li><br>/g, '</li>');
-
         return html;
     };
 
     // --- TYPING ENGINE ---
     window.typeHTML = async function(element, htmlString, speed = 15) {
         element.innerHTML = '';
-        // Split string into HTML tags and plain text
         const parts = htmlString.split(/(<[^>]+>)/g); 
-        
         for (let part of parts) {
             if (part.startsWith('<')) {
-                // If it's an HTML tag, inject it instantly so layout doesn't break
                 element.innerHTML += part;
             } else {
-                // If it's text, type it character by character
                 for (let i = 0; i < part.length; i++) {
-                    // Handle encoded HTML entities (like &amp;) so they don't break during typing
                     if(part[i] === '&') {
                         let entityEnd = part.indexOf(';', i);
                         if(entityEnd !== -1) {
@@ -527,7 +637,6 @@
                             continue;
                         }
                     }
-                    
                     element.innerHTML += part[i];
                     await new Promise(r => setTimeout(r, speed));
                     mainScroll.scrollTop = mainScroll.scrollHeight;
@@ -542,13 +651,11 @@
 
       activateChat();
       
-      // Render User Message
       chatContainer.innerHTML += `
         <div class="message-row user">
             <div class="msg-bubble user">${prompt.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
         </div>`;
       
-      // Render Professional "Thinking" State
       const loaderId = 'loader-' + Date.now();
       chatContainer.innerHTML += `
         <div class="message-row ai" id="${loaderId}">
@@ -586,10 +693,8 @@
         const aiMessage = data.choices[0].message.content;
         chatHistory.push({ role: "assistant", content: aiMessage });
 
-        // Parse markdown to clean HTML
         const parsedHTML = window.parseMarkdownToHTML(aiMessage);
 
-        // Create the container for the typed response
         const messageId = 'msg-' + Date.now();
         chatContainer.innerHTML += `
           <div class="message-row ai">
@@ -597,9 +702,8 @@
             <div class="msg-bubble ai" id="${messageId}"></div>
           </div>`;
 
-        // Execute typing effect
         const targetElement = document.getElementById(messageId);
-        await window.typeHTML(targetElement, parsedHTML, 10); // 10ms per character
+        await window.typeHTML(targetElement, parsedHTML, 10); 
 
       } catch (err) {
         if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
