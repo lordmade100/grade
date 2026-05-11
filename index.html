@@ -153,6 +153,7 @@
       flex-direction: column;
       align-items: center;
       padding: 0 20px 100px 20px;
+      perspective: 1000px; /* Required for Parallax effect */
     }
 
     .content-container {
@@ -193,23 +194,67 @@
     .suggestions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
+      gap: 16px;
     }
 
+    /* ════ SUGGESTION CARDS (3D Parallax + Water Effect) ════ */
     .suggestion-card {
+      position: relative;
       background: var(--bg-sidebar);
       padding: 16px;
       border-radius: 16px;
       cursor: pointer;
-      transition: background 0.2s;
+      min-height: 120px;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.3s ease;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    
+    /* Smooth reset transition when mouse leaves */
+    .suggestion-card.reset {
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
+    }
+
+    /* Flowing Water Drops Overlay */
+    .water-drops {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      /* Custom encoded SVG representing stylized water drops using brand colors */
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 15 Q55 30 50 35 Q45 30 50 15" fill="%230611B1" opacity="0.1"/><path d="M20 50 Q24 62 20 68 Q16 62 20 50" fill="%234285f4" opacity="0.12"/><path d="M80 40 Q84 52 80 58 Q76 52 80 40" fill="%23E63946" opacity="0.08"/><path d="M35 80 Q38 90 35 95 Q32 90 35 80" fill="%239b72cb" opacity="0.1"/></svg>');
+      background-size: 100px 100px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 1;
+      transform: translateZ(10px); /* Pushes the rain slightly forward */
+    }
+
+    /* Animate water drops on hover */
+    .suggestion-card:hover .water-drops {
+      opacity: 1;
+      animation: flowWater 3s linear infinite;
+    }
+
+    @keyframes flowWater {
+      from { background-position: 0 -100px; }
+      to { background-position: 0 0px; }
+    }
+
+    /* Pushes content forward for parallax depth */
+    .card-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 120px;
+      transform: translateZ(20px); 
     }
-    .suggestion-card:hover { background: #E3E3E3; }
-    .suggestion-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; }
+
+    .suggestion-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
     .suggestion-card .icon { align-self: flex-end; background: #FFFFFF; padding: 8px; border-radius: 50%; display: flex; }
+
 
     /* Chat Area */
     .chat-container { display: none; flex-direction: column; gap: 24px; padding-top: 20px; }
@@ -396,6 +441,9 @@
         width: 100%; max-width: 100%; border-radius: 28px 28px 0 0;
         transform: translateY(100%); padding-bottom: calc(40px + env(safe-area-inset-bottom));
       }
+      
+      /* Reduce parallax intensity on mobile */
+      .suggestion-card { transform: none !important; box-shadow: none !important; }
     }
   </style>
 </head>
@@ -466,22 +514,39 @@
           <h2 class="subtitle">How can I help with your PC today?</h2>
           
           <div class="suggestions-grid">
+            
             <div class="suggestion-card" onclick="setPrompt('My computer is running very slow and freezing. How can I fix this?')">
-              <p>Troubleshoot a slow or freezing computer</p>
-              <div class="icon"><i data-feather="cpu" style="width:18px;height:18px;color:#4285f4;"></i></div>
+              <div class="water-drops"></div>
+              <div class="card-content">
+                  <p>Troubleshoot a slow or freezing computer</p>
+                  <div class="icon"><i data-feather="cpu" style="width:18px;height:18px;color:#4285f4;"></i></div>
+              </div>
             </div>
+            
             <div class="suggestion-card" onclick="setPrompt('I need a quote to replace a shattered laptop screen.')">
-              <p>Get a quote for a laptop screen replacement</p>
-              <div class="icon"><i data-feather="monitor" style="width:18px;height:18px;color:#d96570;"></i></div>
+              <div class="water-drops"></div>
+              <div class="card-content">
+                  <p>Get a quote for a laptop screen replacement</p>
+                  <div class="icon"><i data-feather="monitor" style="width:18px;height:18px;color:#d96570;"></i></div>
+              </div>
             </div>
+            
             <div class="suggestion-card" onclick="setPrompt('My laptop keeps turning off randomly. What could be the issue?')">
-              <p>Diagnose sudden power or battery issues</p>
-              <div class="icon"><i data-feather="battery-charging" style="width:18px;height:18px;color:#fbbc04;"></i></div>
+              <div class="water-drops"></div>
+              <div class="card-content">
+                  <p>Diagnose sudden power or battery issues</p>
+                  <div class="icon"><i data-feather="battery-charging" style="width:18px;height:18px;color:#fbbc04;"></i></div>
+              </div>
             </div>
+            
             <div class="suggestion-card" onclick="setPrompt('How do I remove a virus or malware from my Windows PC?')">
-              <p>Help removing viruses and malware</p>
-              <div class="icon"><i data-feather="shield" style="width:18px;height:18px;color:#34a853;"></i></div>
+              <div class="water-drops"></div>
+              <div class="card-content">
+                  <p>Help removing viruses and malware</p>
+                  <div class="icon"><i data-feather="shield" style="width:18px;height:18px;color:#34a853;"></i></div>
+              </div>
             </div>
+
           </div>
         </div>
 
@@ -524,6 +589,45 @@
         sidebar.classList.remove('open');
       }
     });
+
+    // --- 3D PARALLAX EFFECT INITALIZATION ---
+    function initParallaxCards() {
+        if(window.innerWidth <= 768) return; // Disable complex 3D math on mobile to save battery
+        
+        const cards = document.querySelectorAll('.suggestion-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', e => {
+                // Remove smooth transition while moving for real-time response
+                card.classList.remove('reset');
+                
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // Calculate tilt based on distance from center
+                const rotateX = ((y - centerY) / centerY) * -12; // Max tilt 12deg
+                const rotateY = ((x - centerX) / centerX) * 12;
+                
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                
+                // Add a dynamic shadow that reacts to the light source
+                card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.06)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                // Restore smooth transition to snap back
+                card.classList.add('reset');
+                card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                card.style.boxShadow = `0 4px 6px rgba(0,0,0,0.02)`;
+            });
+        });
+    }
+    
+    // Initialize Parallax
+    initParallaxCards();
 
     // --- CUSTOM DIALOG UI LOGIC ---
     const dialogOverlay = document.getElementById('dialogOverlay');
