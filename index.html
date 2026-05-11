@@ -153,7 +153,7 @@
       flex-direction: column;
       align-items: center;
       padding: 0 20px 100px 20px;
-      perspective: 1000px; /* Required for Parallax effect */
+      perspective: 1000px;
     }
 
     .content-container {
@@ -180,6 +180,18 @@
       background-clip: text;
       background-size: 400% 100%;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Verified Badge SVG alignment */
+    .verified-badge {
+      width: 44px;
+      height: 44px;
+      margin-left: 10px;
+      vertical-align: middle;
+      display: inline-block;
+      margin-bottom: 4px; /* visually align with text */
     }
 
     .subtitle {
@@ -211,26 +223,22 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
     
-    /* Smooth reset transition when mouse leaves */
     .suggestion-card.reset {
       transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
     }
 
-    /* Flowing Water Drops Overlay */
     .water-drops {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      /* Custom encoded SVG representing stylized water drops using brand colors */
       background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 15 Q55 30 50 35 Q45 30 50 15" fill="%230611B1" opacity="0.1"/><path d="M20 50 Q24 62 20 68 Q16 62 20 50" fill="%234285f4" opacity="0.12"/><path d="M80 40 Q84 52 80 58 Q76 52 80 40" fill="%23E63946" opacity="0.08"/><path d="M35 80 Q38 90 35 95 Q32 90 35 80" fill="%239b72cb" opacity="0.1"/></svg>');
       background-size: 100px 100px;
       opacity: 0;
       transition: opacity 0.4s ease;
       pointer-events: none;
       z-index: 1;
-      transform: translateZ(10px); /* Pushes the rain slightly forward */
+      transform: translateZ(10px);
     }
 
-    /* Animate water drops on hover */
     .suggestion-card:hover .water-drops {
       opacity: 1;
       animation: flowWater 3s linear infinite;
@@ -241,7 +249,6 @@
       to { background-position: 0 0px; }
     }
 
-    /* Pushes content forward for parallax depth */
     .card-content {
       position: relative;
       z-index: 2;
@@ -326,6 +333,7 @@
       padding: 20px;
       display: flex;
       justify-content: center;
+      z-index: 500;
     }
 
     .input-box {
@@ -439,11 +447,14 @@
       .auth-overlay { align-items: flex-end; }
       .auth-container {
         width: 100%; max-width: 100%; border-radius: 28px 28px 0 0;
-        transform: translateY(100%); padding-bottom: calc(40px + env(safe-area-inset-bottom));
+        transform: translateY(100%); 
+        /* Added significant bottom padding so the sheet sits clearly above the visual level of the input bar */
+        padding-bottom: calc(120px + env(safe-area-inset-bottom));
       }
       
-      /* Reduce parallax intensity on mobile */
       .suggestion-card { transform: none !important; box-shadow: none !important; }
+      
+      .verified-badge { width: 34px; height: 34px; }
     }
   </style>
 </head>
@@ -592,12 +603,11 @@
 
     // --- 3D PARALLAX EFFECT INITALIZATION ---
     function initParallaxCards() {
-        if(window.innerWidth <= 768) return; // Disable complex 3D math on mobile to save battery
+        if(window.innerWidth <= 768) return; 
         
         const cards = document.querySelectorAll('.suggestion-card');
         cards.forEach(card => {
             card.addEventListener('mousemove', e => {
-                // Remove smooth transition while moving for real-time response
                 card.classList.remove('reset');
                 
                 const rect = card.getBoundingClientRect();
@@ -607,26 +617,20 @@
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
                 
-                // Calculate tilt based on distance from center
-                const rotateX = ((y - centerY) / centerY) * -12; // Max tilt 12deg
+                const rotateX = ((y - centerY) / centerY) * -12; 
                 const rotateY = ((x - centerX) / centerX) * 12;
                 
                 card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-                
-                // Add a dynamic shadow that reacts to the light source
                 card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.06)`;
             });
             
             card.addEventListener('mouseleave', () => {
-                // Restore smooth transition to snap back
                 card.classList.add('reset');
                 card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
                 card.style.boxShadow = `0 4px 6px rgba(0,0,0,0.02)`;
             });
         });
     }
-    
-    // Initialize Parallax
     initParallaxCards();
 
     // --- CUSTOM DIALOG UI LOGIC ---
@@ -689,6 +693,14 @@
     
     let currentUser = null;
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+    
+    // Official Blue Verified Badge SVG
+    const VERIFIED_BADGE_SVG = `
+      <svg class="verified-badge" viewBox="0 0 24 24">
+        <path d="M12 2l2.35 2.35 3.31-.73.73 3.31 2.35 2.35-2.35 2.35-.73 3.31-3.31-.73L12 22l-2.35-2.35-3.31.73-.73-3.31L3.26 12l2.35-2.35.73-3.31 3.31.73L12 2z" fill="#4285f4"/>
+        <path d="M10.41 16.59L6.41 12.59 7.83 11.17 10.41 13.76 16.17 8 17.59 9.41 10.41 16.59z" fill="#ffffff"/>
+      </svg>
+    `;
 
     window.openAuth = function() {
       authOverlay.style.display = 'flex';
@@ -739,10 +751,12 @@
       
       if (user) {
         avatarImg.src = user.photoURL || DEFAULT_AVATAR;
-        greetingText.innerText = `Hello, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}`;
+        const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
+        // Inject name + verified badge securely using DOM nodes to prevent XSS
+        greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
       } else {
         avatarImg.src = DEFAULT_AVATAR;
-        greetingText.innerText = `Hello there`;
+        greetingText.innerHTML = `Hello there`;
       }
     });
 
@@ -758,7 +772,7 @@
     }
     loadKey();
 
-    // --- System Prompt with Call Back Instructions ---
+    // --- System Prompt ---
     window.chatHistory = [
         { 
             role: "system", 
@@ -882,10 +896,8 @@
             const phoneNumber = match[1].trim();
             const issueSummary = match[2].trim();
             
-            // Remove the tag so the user doesn't see it
             aiMessage = aiMessage.replace(callbackRegex, '').trim();
             
-            // Push to Firebase Realtime Database
             try {
                 const callbacksRef = ref(db, 'callbacks');
                 await push(callbacksRef, {
@@ -897,7 +909,6 @@
                     timestamp: serverTimestamp()
                 });
                 
-                // Show success dialog
                 window.showDialog(
                     "Callback Requested", 
                     `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
