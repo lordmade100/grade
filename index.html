@@ -92,6 +92,9 @@
       color: var(--text-secondary);
       font-size: 0.9rem;
       transition: background 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .history-item:hover { background: #E3E3E3; }
 
@@ -185,7 +188,6 @@
       flex-wrap: wrap;
     }
 
-    /* Verified Badge SVG alignment */
     .verified-badge {
       width: 38px;
       height: 38px;
@@ -210,7 +212,7 @@
       gap: 16px;
     }
 
-    /* ════ SUGGESTION CARDS (3D Parallax + Water Effect) ════ */
+    /* ════ SUGGESTION CARDS ════ */
     .suggestion-card {
       position: relative;
       background: var(--bg-sidebar);
@@ -263,13 +265,11 @@
     .suggestion-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
     .suggestion-card .icon { align-self: flex-end; background: #FFFFFF; padding: 8px; border-radius: 50%; display: flex; }
 
-
     /* Chat Area */
     .chat-container { display: none; flex-direction: column; gap: 24px; padding-top: 20px; }
 
     .message-row { display: flex; gap: 16px; max-width: 100%; }
     
-    /* User Message */
     .message-row.user { justify-content: flex-end; }
     .msg-bubble.user {
       background: var(--bg-user-msg);
@@ -281,7 +281,6 @@
       line-height: 1.5;
     }
 
-    /* AI Message */
     .message-row.ai { align-items: flex-start; }
     .ai-avatar {
       width: 36px; height: 36px; flex-shrink: 0;
@@ -298,24 +297,16 @@
     /* Markdown Styling */
     .msg-bubble.ai p { margin-bottom: 12px; }
     .msg-bubble.ai h1, .msg-bubble.ai h2, .msg-bubble.ai h3 { 
-      margin-top: 16px; 
-      margin-bottom: 8px; 
-      color: var(--brand-blue); 
-      font-weight: 700;
+      margin-top: 16px; margin-bottom: 8px; color: var(--brand-blue); font-weight: 700;
     }
     .msg-bubble.ai h3 { font-size: 1.1rem; }
     .msg-bubble.ai ul, .msg-bubble.ai ol { margin-left: 20px; margin-bottom: 12px; }
     .msg-bubble.ai li { display: list-item; margin-bottom: 4px; }
     .msg-bubble.ai strong { color: var(--text-primary); font-weight: 700; }
 
-    /* Thinking State */
     .thinking-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--brand-blue);
-      font-weight: 500;
-      font-size: 0.95rem;
+      display: flex; align-items: center; gap: 12px;
+      color: var(--brand-blue); font-weight: 500; font-size: 0.95rem;
     }
 
     .loader-inline { display: flex; gap: 4px; }
@@ -326,43 +317,26 @@
 
     /* Input Area */
     .input-wrapper {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
+      position: absolute; bottom: 0; left: 0; width: 100%;
       background: linear-gradient(transparent, var(--bg-main) 30%);
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      z-index: 500;
+      padding: 20px; display: flex; justify-content: center; z-index: 500;
     }
 
     .input-box {
-      width: 100%;
-      max-width: 800px;
-      background: var(--bg-input);
-      border-radius: 32px;
-      display: flex;
-      align-items: center;
-      padding: 10px 16px;
-      gap: 12px;
+      width: 100%; max-width: 800px; background: var(--bg-input);
+      border-radius: 32px; display: flex; align-items: center;
+      padding: 10px 16px; gap: 12px;
     }
 
     .chat-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-size: 1rem;
-      color: var(--text-primary);
-      font-family: inherit;
-      outline: none;
-      padding: 8px 0;
+      flex: 1; border: none; background: transparent; font-size: 1rem;
+      color: var(--text-primary); font-family: inherit; outline: none; padding: 8px 0;
     }
     .chat-input::placeholder { color: var(--text-secondary); }
 
     .action-btn {
-      background: none; border: none; cursor: pointer;
-      color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; color: var(--text-primary); 
+      display: flex; align-items: center; justify-content: center;
       width: 40px; height: 40px; border-radius: 50%; transition: background 0.2s;
     }
     .action-btn:hover { background: rgba(0,0,0,0.05); }
@@ -419,7 +393,6 @@
 
     .dialog-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
     .dialog-message { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
-    
     .dialog-actions { display: flex; gap: 12px; justify-content: center; }
     
     .dialog-btn {
@@ -453,7 +426,6 @@
       }
       
       .suggestion-card { transform: none !important; box-shadow: none !important; }
-      
       .verified-badge { width: 30px; height: 30px; margin-left: 8px; }
     }
   </style>
@@ -475,7 +447,7 @@
       </button>
       <img src="https://i.postimg.cc/XqY9mvWs/4.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
       <h2 class="auth-title">Welcome to Rare Grade Tech</h2>
-      <p class="auth-subtitle">Sign in to request repair quotes and receive personalized IT support.</p>
+      <p class="auth-subtitle">Sign in to request repair quotes and save your chat history.</p>
       
       <button class="google-btn" id="googleSignInBtn">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
@@ -485,21 +457,15 @@
   </div>
 
   <aside class="sidebar" id="sidebar">
-    <button class="new-chat-btn" onclick="location.reload()">
+    <button class="new-chat-btn" id="newChatBtn">
       <i data-feather="plus" style="width: 20px; height: 20px;"></i>
       New chat
     </button>
     
     <div class="sidebar-history">
       <div class="sidebar-title">Recent</div>
-      <div class="history-item" onclick="setPrompt('PC running slow')">
-        <i data-feather="message-square" style="width: 16px; height: 16px;"></i>
-        PC running slow
-      </div>
-      <div class="history-item" onclick="setPrompt('Screen replacement quote')">
-        <i data-feather="message-square" style="width: 16px; height: 16px;"></i>
-        Screen replacement quote
-      </div>
+      <div id="sidebarHistoryList">
+        </div>
     </div>
   </aside>
 
@@ -525,7 +491,6 @@
           <h2 class="subtitle">How can I help with your PC today?</h2>
           
           <div class="suggestions-grid">
-            
             <div class="suggestion-card" onclick="setPrompt('My computer is running very slow and freezing. How can I fix this?')">
               <div class="water-drops"></div>
               <div class="card-content">
@@ -533,7 +498,6 @@
                   <div class="icon"><i data-feather="cpu" style="width:18px;height:18px;color:#4285f4;"></i></div>
               </div>
             </div>
-            
             <div class="suggestion-card" onclick="setPrompt('I need a quote to replace a shattered laptop screen.')">
               <div class="water-drops"></div>
               <div class="card-content">
@@ -541,7 +505,6 @@
                   <div class="icon"><i data-feather="monitor" style="width:18px;height:18px;color:#d96570;"></i></div>
               </div>
             </div>
-            
             <div class="suggestion-card" onclick="setPrompt('My laptop keeps turning off randomly. What could be the issue?')">
               <div class="water-drops"></div>
               <div class="card-content">
@@ -549,7 +512,6 @@
                   <div class="icon"><i data-feather="battery-charging" style="width:18px;height:18px;color:#fbbc04;"></i></div>
               </div>
             </div>
-            
             <div class="suggestion-card" onclick="setPrompt('How do I remove a virus or malware from my Windows PC?')">
               <div class="water-drops"></div>
               <div class="card-content">
@@ -557,7 +519,6 @@
                   <div class="icon"><i data-feather="shield" style="width:18px;height:18px;color:#34a853;"></i></div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -579,7 +540,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, get, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getRemoteConfig, fetchAndActivate, getValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-remote-config.js";
 
     // Initialize Icons
@@ -593,6 +554,8 @@
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const mainScroll = document.getElementById('mainScroll');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const sidebarHistoryList = document.getElementById('sidebarHistoryList');
 
     menuToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
     document.addEventListener('click', (e) => {
@@ -604,26 +567,20 @@
     // --- 3D PARALLAX EFFECT INITALIZATION ---
     function initParallaxCards() {
         if(window.innerWidth <= 768) return; 
-        
         const cards = document.querySelectorAll('.suggestion-card');
         cards.forEach(card => {
             card.addEventListener('mousemove', e => {
                 card.classList.remove('reset');
-                
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
-                
                 const rotateX = ((y - centerY) / centerY) * -12; 
                 const rotateY = ((x - centerX) / centerX) * 12;
-                
                 card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
                 card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.06)`;
             });
-            
             card.addEventListener('mouseleave', () => {
                 card.classList.add('reset');
                 card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
@@ -644,7 +601,6 @@
         dialogTitle.innerText = title;
         dialogMessage.innerText = message;
         dialogActions.innerHTML = '';
-        
         buttons.forEach(btn => {
             const buttonEl = document.createElement('button');
             buttonEl.className = `dialog-btn ${btn.type || 'secondary'}`;
@@ -655,7 +611,6 @@
             };
             dialogActions.appendChild(buttonEl);
         });
-
         dialogOverlay.style.display = 'flex';
         setTimeout(() => {
             dialogOverlay.style.opacity = '1';
@@ -684,7 +639,7 @@
     const remoteConfig = getRemoteConfig(app);
     remoteConfig.settings.minimumFetchIntervalMillis = 0;
 
-    // --- AUTHENTICATION UI LOGIC ---
+    // --- AUTH & STATE ---
     const authOverlay = document.getElementById('authOverlay');
     const authContainer = document.getElementById('authContainer');
     const closeAuthBtn = document.getElementById('closeAuthBtn');
@@ -692,9 +647,24 @@
     const googleSignInBtn = document.getElementById('googleSignInBtn');
     
     let currentUser = null;
-    const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+    let currentChatId = null; 
+
+    const SYSTEM_PROMPT = { 
+        role: "system", 
+        content: `You are Steward, a professional technical support and IT repair consultant from Rare Grade Tech. 
+        YOUR GOALS:
+        1. Greet users warmly and proactively drive the conversation toward assisting with computer-related tech support, software troubleshooting, or hardware repair quotes.
+        2. If a user asks about non-computer topics, politely decline and provide the support number: +27 0800 123 456.
+        3. CALLBACK FEATURE: Always let users know they can request a "call back" or phone call if their issue is complex or they want a direct quote. 
+        4. If a user requests a call back, ask for their phone number and a brief summary of their issue.
+        5. Once they provide their phone number, you MUST explicitly reply in the chat with feedback letting the client know that their details have been sent to the admin team and an agent will call them back shortly.
+        6. At the very end of your response, you MUST append this exact hidden tag: [CALLBACK: phone_number | brief_issue_summary].
+        Keep responses clear, professional, empathetic, and well-formatted using markdown.`
+    };
     
-    // Official Twitter/X Verified Badge SVG (scalloped checkmark)
+    window.chatHistory = [SYSTEM_PROMPT];
+
+    const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
     const VERIFIED_BADGE_SVG = `
       <svg class="verified-badge" viewBox="0 0 24 24" aria-label="Verified account">
         <path fill="#1D9BF0" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.827 2.766 2.057 3.465-.056.297-.09.6-.09.914 0 2.21 1.71 4 3.918 4 .556 0 1.082-.114 1.56-.318.572 1.39 1.95 2.37 3.52 2.37s2.948-.98 3.52-2.37c.478.204 1.004.318 1.56.318 2.21 0 3.918-1.79 3.918-4 0-.314-.033-.617-.09-.914 1.23-.698 2.057-2.004 2.057-3.465z"></path>
@@ -721,14 +691,10 @@
 
     profileBtn.addEventListener('click', () => {
         if (currentUser) {
-            window.showDialog(
-                "Sign Out", 
-                "Do you want to sign out of Rare Grade Tech?",
-                [
-                    { text: "Cancel", type: "secondary" },
-                    { text: "Sign Out", type: "primary", onClick: () => signOut(auth) }
-                ]
-            );
+            window.showDialog("Sign Out", "Do you want to sign out of Rare Grade Tech?", [
+                { text: "Cancel", type: "secondary" },
+                { text: "Sign Out", type: "primary", onClick: () => signOut(auth) }
+            ]);
         } else {
             window.openAuth();
         }
@@ -752,13 +718,114 @@
       if (user) {
         avatarImg.src = user.photoURL || DEFAULT_AVATAR;
         const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
-        // Inject name + verified badge securely using DOM nodes
         greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
+        
+        // Load sidebar chats when authenticated
+        loadSidebarChats(user.uid);
       } else {
         avatarImg.src = DEFAULT_AVATAR;
         greetingText.innerHTML = `Hello there`;
+        sidebarHistoryList.innerHTML = ''; // clear sidebar
+        startNewChat();
       }
     });
+
+    // --- CHAT HISTORY / FIREBASE SAVING ---
+    async function loadSidebarChats(uid) {
+        const chatsRef = ref(db, `chats/${uid}`);
+        const snap = await get(chatsRef);
+        sidebarHistoryList.innerHTML = '';
+        
+        if (snap.exists()) {
+            const chats = [];
+            snap.forEach(childSnap => {
+                chats.push({ id: childSnap.key, ...childSnap.val() });
+            });
+            // Sort newest first
+            chats.sort((a, b) => b.updatedAt - a.updatedAt);
+            
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `<i data-feather="message-square" style="width: 16px; height: 16px;"></i> ${window.escapeHtml(chat.title || 'New Chat')}`;
+                div.onclick = () => loadSpecificChat(chat.id, uid);
+                sidebarHistoryList.appendChild(div);
+            });
+            feather.replace();
+        }
+    }
+
+    async function loadSpecificChat(chatId, uid) {
+        if(window.innerWidth <= 768) sidebar.classList.remove('open');
+        
+        const chatRef = ref(db, `chats/${uid}/${chatId}`);
+        const snap = await get(chatRef);
+        
+        if (snap.exists()) {
+            const chatData = snap.val();
+            currentChatId = chatId;
+            window.chatHistory = chatData.messages || [SYSTEM_PROMPT];
+            
+            // Render UI
+            welcomeScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            chatContainer.innerHTML = '';
+            
+            for (let msg of window.chatHistory) {
+                if (msg.role === 'system') continue;
+                if (msg.role === 'user') {
+                    chatContainer.innerHTML += `
+                        <div class="message-row user">
+                            <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
+                        </div>`;
+                } else if (msg.role === 'assistant') {
+                    const parsedHTML = window.parseMarkdownToHTML(msg.content);
+                    chatContainer.innerHTML += `
+                        <div class="message-row ai">
+                            <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar">
+                            <div class="msg-bubble ai">${parsedHTML}</div>
+                        </div>`;
+                }
+            }
+            mainScroll.scrollTop = mainScroll.scrollHeight;
+        }
+    }
+
+    async function saveCurrentChat() {
+        if (!currentUser) return;
+        const uid = currentUser.uid;
+        
+        if (!currentChatId) {
+            const newChatRef = push(ref(db, `chats/${uid}`));
+            currentChatId = newChatRef.key;
+        }
+        
+        const userMsg = window.chatHistory.find(m => m.role === 'user');
+        let title = "New Conversation";
+        if (userMsg) {
+            title = userMsg.content.substring(0, 30);
+            if (userMsg.content.length > 30) title += '...';
+        }
+        
+        await set(ref(db, `chats/${uid}/${currentChatId}`), {
+            title: title,
+            updatedAt: serverTimestamp(),
+            messages: window.chatHistory
+        });
+        
+        loadSidebarChats(uid); // Refresh sidebar list
+    }
+
+    function startNewChat() {
+        currentChatId = null;
+        window.chatHistory = [SYSTEM_PROMPT];
+        chatContainer.innerHTML = '';
+        welcomeScreen.style.display = 'block';
+        chatContainer.style.display = 'none';
+        if (window.innerWidth <= 768) sidebar.classList.remove('open');
+    }
+    
+    newChatBtn.onclick = startNewChat;
 
     // --- API KEYS ---
     const API_BASE = "https://api.x.ai/v1";
@@ -772,22 +839,6 @@
     }
     loadKey();
 
-    // --- System Prompt ---
-    window.chatHistory = [
-        { 
-            role: "system", 
-            content: `You are Steward, a professional technical support and IT repair consultant from Rare Grade Tech. 
-            YOUR GOALS:
-            1. Greet users warmly and proactively drive the conversation toward assisting with computer-related tech support, software troubleshooting, or hardware repair quotes.
-            2. If a user asks about non-computer topics, politely decline and provide the support number: +27 0800 123 456.
-            3. CALLBACK FEATURE: Always let users know they can request a "call back" or phone call if their issue is complex or they want a direct quote. 
-            4. If a user requests a call back, ask for their phone number and a brief summary of their issue.
-            5. Once they provide their phone number, you MUST explicitly reply in the chat with feedback letting the client know that their details have been sent to the admin team and an agent will call them back shortly.
-            6. At the very end of your response, you MUST append this exact hidden tag: [CALLBACK: phone_number | brief_issue_summary].
-            Keep responses clear, professional, empathetic, and well-formatted using markdown.`
-        }
-    ];
-
     window.activateChat = function() { 
         welcomeScreen.style.display = 'none'; 
         chatContainer.style.display = 'flex'; 
@@ -798,9 +849,12 @@
         window.handleSend(); 
     };
 
-    // --- MARKDOWN PARSER ---
+    window.escapeHtml = function(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    };
+
     window.parseMarkdownToHTML = function(text) {
-        let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        let html = window.escapeHtml(text);
         html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
         html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
         html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
@@ -815,8 +869,7 @@
         return html;
     };
 
-    // --- TYPING ENGINE ---
-    window.typeHTML = async function(element, htmlString, speed = 15) {
+    window.typeHTML = async function(element, htmlString, speed = 10) {
         element.innerHTML = '';
         const parts = htmlString.split(/(<[^>]+>)/g); 
         for (let part of parts) {
@@ -848,7 +901,7 @@
       
       chatContainer.innerHTML += `
         <div class="message-row user">
-            <div class="msg-bubble user">${prompt.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+            <div class="msg-bubble user">${window.escapeHtml(prompt)}</div>
         </div>`;
       
       const loaderId = 'loader-' + Date.now();
@@ -870,6 +923,7 @@
 
       try {
         chatHistory.push({ role: "user", content: prompt });
+        saveCurrentChat(); // Save user message
         
         const res = await fetch(`${API_BASE}/chat/completions`, {
             method: 'POST',
@@ -883,19 +937,17 @@
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         
-        document.getElementById(loaderId).remove();
+        if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
 
         let aiMessage = data.choices[0].message.content;
-        chatHistory.push({ role: "assistant", content: aiMessage });
-
-        // --- CALLBACK PARSER LOGIC ---
+        
+        // Callback Parsing
         const callbackRegex = /\[CALLBACK:\s*(.*?)\s*\|\s*(.*?)\]/i;
         const match = aiMessage.match(callbackRegex);
         
         if (match) {
             const phoneNumber = match[1].trim();
             const issueSummary = match[2].trim();
-            
             aiMessage = aiMessage.replace(callbackRegex, '').trim();
             
             try {
@@ -914,10 +966,12 @@
                     `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
                     [ { text: "OK", type: "primary-blue" } ]
                 );
-            } catch(e) {
-                console.error("Failed to save callback:", e);
-            }
+            } catch(e) { console.error("Failed to save callback:", e); }
         }
+
+        // Push clean message to history & save
+        chatHistory.push({ role: "assistant", content: aiMessage });
+        saveCurrentChat(); 
 
         const parsedHTML = window.parseMarkdownToHTML(aiMessage);
         const messageId = 'msg-' + Date.now();
