@@ -405,8 +405,7 @@
     <div class="dialog-container" id="dialogContainer">
       <h3 class="dialog-title" id="dialogTitle">Title</h3>
       <p class="dialog-message" id="dialogMessage">Message</p>
-      <div class="dialog-actions" id="dialogActions">
-        </div>
+      <div class="dialog-actions" id="dialogActions"></div>
     </div>
   </div>
 
@@ -434,11 +433,11 @@
     
     <div class="sidebar-history">
       <div class="sidebar-title">Recent</div>
-      <div class="history-item">
+      <div class="history-item" onclick="setPrompt('PC running slow')">
         <i data-feather="message-square" style="width: 16px; height: 16px;"></i>
         PC running slow
       </div>
-      <div class="history-item">
+      <div class="history-item" onclick="setPrompt('Screen replacement quote')">
         <i data-feather="message-square" style="width: 16px; height: 16px;"></i>
         Screen replacement quote
       </div>
@@ -504,7 +503,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getRemoteConfig, fetchAndActivate, getValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-remote-config.js";
 
     // Initialize Icons
@@ -602,14 +601,10 @@
     };
 
     closeAuthBtn.addEventListener('click', window.closeAuth);
-    
-    authOverlay.addEventListener('click', (e) => {
-        if(e.target === authOverlay) window.closeAuth();
-    });
+    authOverlay.addEventListener('click', (e) => { if(e.target === authOverlay) window.closeAuth(); });
 
     profileBtn.addEventListener('click', () => {
         if (currentUser) {
-            // Using Custom Dialog instead of window.confirm
             window.showDialog(
                 "Sign Out", 
                 "Do you want to sign out of Rare Grade Tech?",
@@ -629,13 +624,7 @@
             await signInWithPopup(auth, googleProvider);
             window.closeAuth();
         } catch (error) {
-            console.error("Sign-in error:", error);
-            // Using Custom Dialog instead of window.alert
-            window.showDialog(
-                "Sign In Failed", 
-                "We couldn't sign you in. Please try again.",
-                [ { text: "OK", type: "primary-blue" } ]
-            );
+            window.showDialog("Sign In Failed", "We couldn't sign you in. Please try again.", [ { text: "OK", type: "primary-blue" } ]);
         }
     });
 
@@ -665,13 +654,18 @@
     }
     loadKey();
 
-    // --- System Prompt ---
+    // --- System Prompt with Call Back Instructions ---
     window.chatHistory = [
         { 
             role: "system", 
-            content: `You are Steward, an expert technical support and IT repair consultant from Rare Grade Tech company. 
-            CRITICAL INSTRUCTION: You exclusively handle computer-related technical support, software troubleshooting, and hardware repair quotes for PCs, laptops, and computer peripherals. 
-            If a user asks about ANYTHING else that is not related to computers (e.g., phones, cars, general knowledge, math, cooking, non-PC programming, etc.), you MUST politely decline to answer and instruct them to call the company support number: +27 0800 123 456. Do not attempt to answer non-computer related questions. Keep responses professional and well-formatted.`
+            content: `You are Steward, a professional technical support and IT repair consultant from Rare Grade Tech. 
+            YOUR GOALS:
+            1. Greet users warmly and proactively drive the conversation toward assisting with computer-related tech support, software troubleshooting, or hardware repair quotes.
+            2. If a user asks about non-computer topics, politely decline and provide the support number: +27 0800 123 456.
+            3. CALLBACK FEATURE: Always let users know they can request a "call back" or phone call if their issue is complex or they want a direct quote. 
+            4. If a user requests a call back, ask for their phone number and a brief summary of their issue.
+            5. Once they provide their phone number, acknowledge it naturally in your text. Then, you MUST append this exact hidden tag at the very end of your final response: [CALLBACK: phone_number | brief_issue_summary].
+            Keep responses clear, professional, empathetic, and well-formatted using markdown.`
         }
     ];
 
@@ -772,12 +766,46 @@
         
         document.getElementById(loaderId).remove();
 
-        const aiMessage = data.choices[0].message.content;
+        let aiMessage = data.choices[0].message.content;
         chatHistory.push({ role: "assistant", content: aiMessage });
 
-        const parsedHTML = window.parseMarkdownToHTML(aiMessage);
+        // --- CALLBACK PARSER LOGIC ---
+        const callbackRegex = /\[CALLBACK:\s*(.*?)\s*\|\s*(.*?)\]/i;
+        const match = aiMessage.match(callbackRegex);
+        
+        if (match) {
+            const phoneNumber = match[1].trim();
+            const issueSummary = match[2].trim();
+            
+            // Remove the tag so the user doesn't see it
+            aiMessage = aiMessage.replace(callbackRegex, '').trim();
+            
+            // Push to Firebase Realtime Database
+            try {
+                const callbacksRef = ref(db, 'callbacks');
+                await push(callbacksRef, {
+                    phone: phoneNumber,
+                    issue: issueSummary,
+                    uid: currentUser ? currentUser.uid : 'guest',
+                    name: currentUser ? currentUser.displayName : 'Guest User',
+                    status: 'pending',
+                    timestamp: serverTimestamp()
+                });
+                
+                // Show success dialog
+                window.showDialog(
+                    "Callback Requested", 
+                    `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
+                    [ { text: "OK", type: "primary-blue" } ]
+                );
+            } catch(e) {
+                console.error("Failed to save callback:", e);
+            }
+        }
 
+        const parsedHTML = window.parseMarkdownToHTML(aiMessage);
         const messageId = 'msg-' + Date.now();
+        
         chatContainer.innerHTML += `
           <div class="message-row ai">
             <img src="https://i.postimg.cc/XqY9mvWs/4.png" class="ai-avatar" alt="AI">
