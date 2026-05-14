@@ -986,7 +986,13 @@
         padding-bottom: calc(120px + env(safe-area-inset-bottom));
       }
       
-      .suggestion-card { transform: none !important; box-shadow: none !important; }
+      .suggestions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .suggestion-card { transform: none !important; box-shadow: none !important; min-height: 100px; padding: 14px; }
+      .suggestion-card p { font-size: 0.85rem; }
+      .suggestion-card .icon { padding: 6px; }
       .verified-badge { width: 30px; height: 30px; margin-left: 8px; }
       
       .message-actions { opacity: 1; }
@@ -1129,6 +1135,7 @@
     }
 
   </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -2858,6 +2865,8 @@
         const targetElement = document.getElementById(messageId);
         await window.typeHTML(targetElement, parsedHTML, 5);
         feather.replace();
+
+        if (navigator.vibrate) navigator.vibrate(200);
 
     // ══════════════════════════════════════════
     // PWA INSTALLATION LOGIC
