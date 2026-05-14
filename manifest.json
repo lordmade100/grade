@@ -2,7 +2,7 @@
   "name": "Steward AI - Rare Grade Tech",
   "short_name": "Steward AI",
   "description": "Professional IT support and repair assistant from Rare Grade Tech",
-  "start_url": "./steward-ai-pwa.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#0611B1",
