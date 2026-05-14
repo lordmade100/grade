@@ -1019,6 +1019,7 @@
       background: var(--text-secondary);
     }
   </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1357,8 +1358,9 @@
         2. If a user asks about non-computer topics, politely decline and provide the support number: +27 0800 123 456.
         3. CALLBACK FEATURE: Always let users know they can request a "call back" or phone call if their issue is complex or they want a direct quote. 
         4. If a user requests a call back, ask for their phone number and a brief summary of their issue.
-        5. Once they provide their phone number, you MUST explicitly reply in the chat with feedback letting the client know that their details have been sent to the admin team and an agent will call them back shortly.
+        5. Once they provide their phone number, you MUST explicitly reply in the chat with natural, conversational feedback letting the client know that their details have been sent to the admin team and an agent will call them back shortly. Do not just append the tag—actually tell them in the message body.
         6. At the very end of your response, you MUST append this exact hidden tag: [CALLBACK: phone_number | brief_issue_summary].
+        7. If a user uploads an image, acknowledge that you see it and offer help based on what they describe or ask.
         Keep responses clear, professional, empathetic, and well-formatted using markdown.`
     };
     
@@ -1521,10 +1523,15 @@
                 const time = msg.timestamp ? formatTime(msg.timestamp) : '';
                 
                 if (msg.role === 'user') {
+                    let userContentHtml = window.escapeHtml(msg.content);
+                    if (msg.imageUrl) {
+                        userContentHtml = userContentHtml.replace(`[User uploaded image: ${msg.imageUrl}]`, '').trim();
+                        userContentHtml += `<div style="margin-top:8px;"><img src="${msg.imageUrl}" style="max-width:100%;max-height:300px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="Uploaded image"></div>`;
+                    }
                     chatContainer.insertAdjacentHTML('beforeend', `
                         <div class="message-row user">
                             <div>
-                                <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
+                                <div class="msg-bubble user">${userContentHtml}</div>
                                 ${time ? `<div class="message-time">${time}</div>` : ''}
                             </div>
                         </div>`);
@@ -1787,20 +1794,42 @@
     // ════ IMAGE UPLOAD UI ════
     imageBtn.addEventListener('click', () => fileInput.click());
     
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            pendingImage = file;
-            const reader = new FileReader();
-            reader.onload = (event) => {
+        if (!file) return;
+
+        imagePreview.innerHTML = `
+            <div class="image-preview-item" style="display:flex;align-items:center;justify-content:center;background:var(--bg-sidebar);">
+                <div class="loader-inline"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+        `;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+        try {
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.secure_url) {
+                pendingImage = { url: data.secure_url, public_id: data.public_id };
                 imagePreview.innerHTML = `
                     <div class="image-preview-item">
-                        <img src="${event.target.result}" alt="Preview">
+                        <img src="${data.secure_url}" alt="Preview">
                         <button onclick="window.clearImage()" title="Remove">×</button>
                     </div>
                 `;
-            };
-            reader.readAsDataURL(file);
+            } else {
+                throw new Error('Upload failed');
+            }
+        } catch (err) {
+            console.error('Cloudinary upload failed:', err);
+            window.showDialog('Upload Failed', 'Could not upload image to Cloudinary. Please check your cloud name and upload preset, then try again.', [{ text: 'OK', type: 'primary-blue' }]);
+            pendingImage = null;
+            imagePreview.innerHTML = '';
         }
         fileInput.value = '';
     });
@@ -1884,10 +1913,16 @@
       
       const userTimestamp = Date.now();
       
+      let userContentHtml = window.escapeHtml(prompt);
+      if (imageData && imageData.url) {
+          userContentHtml = userContentHtml.replace(`[User uploaded image: ${imageData.url}]`, '').trim();
+          userContentHtml += `<div style="margin-top:8px;"><img src="${imageData.url}" style="max-width:100%;max-height:300px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="Uploaded image"></div>`;
+      }
+
       chatContainer.insertAdjacentHTML('beforeend', `
         <div class="message-row user">
             <div>
-                <div class="msg-bubble user">${window.escapeHtml(prompt)}</div>
+                <div class="msg-bubble user">${userContentHtml}</div>
                 <div class="message-time">${formatTime(userTimestamp)}</div>
             </div>
         </div>`);
@@ -1917,7 +1952,7 @@
       ];
 
       try {
-        chatHistory.push({ role: "user", content: prompt, timestamp: userTimestamp });
+        chatHistory.push({ role: "user", content: prompt, imageUrl: imageData ? imageData.url : null, timestamp: userTimestamp });
         saveCurrentChat();
         
         const res = await fetch(`${API_BASE}/chat/completions`, {
