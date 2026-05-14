@@ -1041,11 +1041,9 @@
       background: var(--text-secondary);
     }
   </style>
-<base target="_blank">
 </head>
 <body>
 
-  <!-- ════ SPLASH SCREEN ════ -->
   <div id="splashScreen">
     <div class="splash-logo-wrap">
       <div class="splash-ring-2"></div>
@@ -1345,7 +1343,7 @@
         setTimeout(() => { dialogOverlay.style.display = 'none'; }, 300);
     };
 
-    // --- FIREBASE CONFIG (PRESERVED EXACTLY) ---
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -1547,7 +1545,7 @@
                 if (msg.role === 'user') {
                     let userContentHtml = window.escapeHtml(msg.content);
                     if (msg.imageUrl) {
-                        userContentHtml = userContentHtml.replace(`[User uploaded image: ${msg.imageUrl}]`, '').trim();
+                        userContentHtml = userContentHtml.replace(`[User attached image]`, '').trim();
                         userContentHtml += `<div style="margin-top:8px;"><img src="${msg.imageUrl}" style="max-width:100%;max-height:300px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="Uploaded image"></div>`;
                     }
                     chatContainer.insertAdjacentHTML('beforeend', `
@@ -1919,13 +1917,20 @@
     window.handleSend = async function() {
       let prompt = userInput.value.trim();
       
+      let uploadedImageUrl = null;
       if (pendingImage) {
-          prompt += `\n\n[User attached image: ${pendingImage.name}]`;
+          uploadedImageUrl = pendingImage.url;
+          prompt += `\n\n[User attached image]`;
           pendingImage = null;
           imagePreview.innerHTML = '';
       }
       
-      if (!prompt || !XAI_API_KEY) return;
+      if (!prompt && !uploadedImageUrl) return;
+
+      if (!XAI_API_KEY) {
+          window.showDialog("Missing API Key", "The AI API key hasn't loaded yet or is missing from Firebase Remote Config.", [{ text: "OK", type: "primary-blue" }]);
+          return;
+      }
 
       if (!currentUser && guestPromptCount >= 3) {
         showAuthGateCard();
@@ -1938,9 +1943,9 @@
       const userTimestamp = Date.now();
       
       let userContentHtml = window.escapeHtml(prompt);
-      if (imageData && imageData.url) {
-          userContentHtml = userContentHtml.replace(`[User uploaded image: ${imageData.url}]`, '').trim();
-          userContentHtml += `<div style="margin-top:8px;"><img src="${imageData.url}" style="max-width:100%;max-height:300px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="Uploaded image"></div>`;
+      if (uploadedImageUrl) {
+          userContentHtml = userContentHtml.replace(`[User attached image]`, '').trim();
+          userContentHtml += `<div style="margin-top:8px;"><img src="${uploadedImageUrl}" style="max-width:100%;max-height:300px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="Uploaded image"></div>`;
       }
 
       chatContainer.insertAdjacentHTML('beforeend', `
@@ -1976,14 +1981,14 @@
       ];
 
       try {
-        chatHistory.push({ role: "user", content: prompt, imageUrl: imageData ? imageData.url : null, timestamp: userTimestamp });
+        chatHistory.push({ role: "user", content: prompt, imageUrl: uploadedImageUrl, timestamp: userTimestamp });
         saveCurrentChat();
         
         const res = await fetch(`${API_BASE}/chat/completions`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning", 
+                model: "grok-4.3", 
                 messages: chatHistory
             })
         });
