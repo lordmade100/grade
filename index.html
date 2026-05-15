@@ -1,3131 +1,646 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0611B1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Steward AI" />
-  <title>Steward | Rare Grade Tech</title>
-
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="apple-touch-icon" href="./icon-192x192.png" />
-  
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rare Grade Tech — Consultant Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/feather-icons"></script>
-
   <style>
-    /* ══════════════════════════════════════════
-       THEME SYSTEM
-    ══════════════════════════════════════════ */
     :root {
-        --bg-main: #FFFFFF;
-        --bg-sidebar: #F0F4F9;
-        --bg-input: #F0F4F9;
-        --bg-user-msg: #F0F4F9;
-        --bg-hover: #E3E3E3;
-        --text-primary: #1F1F1F;
-        --text-secondary: #444746;
-        --text-muted: #8E918F;
-        --border-color: #E3E3E3;
-        --brand-blue: #0611B1;
-        --brand-red: #E63946;
-        --gemini-gradient: linear-gradient(74deg, #4285f4 0, #9b72cb 9%, #d96570 20%, #d96570 24%, #9b72cb 35%, #4285f4 44%, #9b72cb 50%, #d96570 56%, #1F1F1F 75%, #1F1F1F 100%);
-        --code-bg: #f4f4f5;
-        --shadow-color: rgba(0,0,0,0.06);
-        --success: #34a853;
-        --warning: #fbbc04;
+      --bg: #F0F4F9; --bg-card: #FFFFFF; --bg-input: #F0F4F9;
+      --text: #1F1F1F; --text-2: #444746; --text-muted: #8E918F;
+      --border: #E3E3E3; --blue: #0611B1; --green: #34a853; --red: #E63946;
+      --yellow: #fbbc04; --shadow: rgba(0,0,0,0.06);
     }
-
     [data-theme="dark"] {
-        --bg-main: #1F1F1F;
-        --bg-sidebar: #2C2C2C;
-        --bg-input: #2C2C2C;
-        --bg-user-msg: #2C2C2C;
-        --bg-hover: #3C3C3C;
-        --text-primary: #E3E3E3;
-        --text-secondary: #B4B4B4;
-        --text-muted: #888888;
-        --border-color: #444746;
-        --brand-blue: #4285f4;
-        --brand-red: #ff6b6b;
-        --gemini-gradient: linear-gradient(74deg, #4285f4 0, #9b72cb 9%, #d96570 20%, #d96570 24%, #9b72cb 35%, #4285f4 44%, #9b72cb 50%, #d96570 56%, #E3E3E3 75%, #E3E3E3 100%);
-        --code-bg: #2d2d30;
-        --shadow-color: rgba(0,0,0,0.3);
-        --success: #81c995;
-        --warning: #fde293;
+      --bg: #1A1A1A; --bg-card: #242424; --bg-input: #2C2C2C;
+      --text: #E3E3E3; --text-2: #B4B4B4; --text-muted: #666;
+      --border: #3A3A3A; --blue: #4285f4; --shadow: rgba(0,0,0,0.3);
     }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    
-    html { scroll-behavior: smooth; }
-    
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg-main);
-      color: var(--text-primary);
-      height: 100svh; 
-      display: flex;
-      overflow: hidden;
-    }
+    /* Auth Screen */
+    .auth-screen { flex:1; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .auth-card { background:var(--bg-card); border-radius:24px; padding:40px 32px; max-width:400px; width:100%; text-align:center; box-shadow:0 8px 32px var(--shadow); }
+    .auth-card img { height:56px; margin-bottom:24px; object-fit:contain; }
+    .auth-card h1 { font-size:1.5rem; font-weight:700; margin-bottom:8px; }
+    .auth-card p { font-size:0.9rem; color:var(--text-2); margin-bottom:28px; }
+    .google-btn { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px; background:var(--bg-card); border:1px solid var(--border); border-radius:50px; font-family:inherit; font-size:1rem; font-weight:500; cursor:pointer; color:var(--text); transition:background 0.2s; }
+    .google-btn:hover { background:var(--bg); }
+    .google-btn img { width:22px; }
 
-    /* ══════════════════════════════════════════
-       SPLASH SCREEN
-    ══════════════════════════════════════════ */
-    #splashScreen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-main);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 32px;
-      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-    }
+    /* Dashboard layout */
+    .dashboard { display:none; flex:1; flex-direction:column; }
+    .topbar { height:64px; background:var(--bg-card); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; position:sticky; top:0; z-index:100; }
+    .topbar-left { display:flex; align-items:center; gap:16px; }
+    .topbar-left img { height:36px; object-fit:contain; }
+    .topbar-title { font-size:1rem; font-weight:700; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .consultant-info { display:flex; align-items:center; gap:10px; font-size:0.88rem; }
+    .consultant-avatar { width:36px; height:36px; border-radius:50%; object-fit:cover; background:var(--blue); }
+    .status-pill { display:flex; align-items:center; gap:6px; background:rgba(52,168,83,0.12); border:1px solid rgba(52,168,83,0.25); border-radius:50px; padding:5px 12px; font-size:0.78rem; font-weight:600; color:var(--green); cursor:pointer; }
+    .status-dot-pill { width:8px; height:8px; border-radius:50%; background:var(--green); }
+    .icon-btn { background:none; border:none; cursor:pointer; color:var(--text-muted); padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s,color 0.2s; }
+    .icon-btn:hover { background:var(--bg); color:var(--text); }
 
-    #splashScreen.hide {
-      opacity: 0;
-      transform: scale(1.04);
-      pointer-events: none;
-    }
+    /* Main grid */
+    .main-grid { display:grid; grid-template-columns:340px 1fr; flex:1; height:calc(100vh - 64px); overflow:hidden; }
 
-    .splash-logo-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    /* Queue panel */
+    .queue-panel { background:var(--bg-card); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+    .queue-header { padding:20px 20px 12px; border-bottom:1px solid var(--border); }
+    .queue-header h2 { font-size:1rem; font-weight:700; margin-bottom:4px; }
+    .queue-tabs { display:flex; gap:4px; margin-top:12px; }
+    .q-tab { flex:1; padding:7px 0; border:none; border-radius:10px; font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; color:var(--text-muted); background:transparent; transition:all 0.2s; position:relative; }
+    .q-tab.active { background:var(--bg); color:var(--text); }
+    .q-tab-badge { position:absolute; top:-4px; right:6px; background:var(--red); color:white; border-radius:50%; width:18px; height:18px; font-size:0.68rem; display:none; align-items:center; justify-content:center; font-weight:700; }
+    .q-tab-badge.show { display:flex; animation:badgePop 0.3s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes badgePop { from{transform:scale(0)}to{transform:scale(1)} }
+    .queue-list { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .queue-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-muted); text-align:center; padding:40px; }
+    .queue-empty svg { opacity:0.3; }
+    .queue-empty p { font-size:0.88rem; }
 
-    .splash-ring {
-      position: absolute;
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      background:
-        linear-gradient(var(--bg-main), var(--bg-main)) padding-box,
-        linear-gradient(135deg, #4285f4, #9b72cb, #d96570, #4285f4) border-box;
-      animation: ringPulse 2.4s ease-in-out infinite;
-    }
+    /* Queue card */
+    .queue-card { background:var(--bg); border:1.5px solid var(--border); border-radius:16px; padding:14px 16px; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+    .queue-card:hover { border-color:var(--blue); box-shadow:0 2px 12px var(--shadow); }
+    .queue-card.selected { border-color:var(--blue); background:rgba(6,17,177,0.04); }
+    .queue-card.waiting::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--yellow); border-radius:3px 0 0 3px; }
+    .queue-card.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--green); border-radius:3px 0 0 3px; }
+    .queue-card.closed::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--text-muted); border-radius:3px 0 0 3px; }
+    .qc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .qc-name { font-size:0.92rem; font-weight:700; color:var(--text); }
+    .qc-time { font-size:0.72rem; color:var(--text-muted); }
+    .qc-email { font-size:0.78rem; color:var(--text-muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .qc-status { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:50px; font-size:0.72rem; font-weight:700; text-transform:uppercase; }
+    .qc-status.waiting { background:rgba(251,188,4,0.12); color:#b8860b; }
+    .qc-status.active  { background:rgba(52,168,83,0.12); color:var(--green); }
+    .qc-status.closed  { background:var(--bg-input); color:var(--text-muted); }
+    .qc-last-msg { font-size:0.8rem; color:var(--text-2); margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .qc-unread { position:absolute; top:14px; right:14px; background:var(--blue); color:white; border-radius:50%; width:20px; height:20px; font-size:0.7rem; font-weight:700; display:none; align-items:center; justify-content:center; }
+    .qc-unread.show { display:flex; }
 
-    @keyframes ringPulse {
-      0%, 100% { transform: scale(1);   opacity: 0.5; }
-      50%       { transform: scale(1.1); opacity: 1;   }
-    }
+    /* Chat panel */
+    .chat-panel { display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+    .chat-empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-muted); text-align:center; }
+    .chat-empty-state svg { opacity:0.2; }
 
-    .splash-ring-2 {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      border: 1px solid transparent;
-      background:
-        linear-gradient(var(--bg-main), var(--bg-main)) padding-box,
-        linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%) border-box;
-      animation: ringPulse2 2.4s ease-in-out infinite;
-      opacity: 0.3;
-    }
+    /* Active chat header */
+    .chat-top { background:var(--bg-card); border-bottom:1px solid var(--border); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .chat-user-info { display:flex; align-items:center; gap:12px; }
+    .chat-user-avatar { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#0611B1,#4285f4); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1rem; flex-shrink:0; }
+    .chat-user-name { font-size:1rem; font-weight:700; }
+    .chat-user-email { font-size:0.78rem; color:var(--text-muted); margin-top:2px; }
+    .chat-actions { display:flex; gap:8px; }
+    .chat-action-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:50px; border:none; font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-accept { background:linear-gradient(135deg,#34a853,#2d9245); color:white; box-shadow:0 2px 8px rgba(52,168,83,0.3); }
+    .btn-accept:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(52,168,83,0.4); }
+    .btn-end { background:rgba(230,57,70,0.1); color:var(--red); border:1px solid rgba(230,57,70,0.2); }
+    .btn-end:hover { background:rgba(230,57,70,0.18); }
 
-    @keyframes ringPulse2 {
-      0%, 100% { transform: scale(1.05); opacity: 0.2; }
-      50%       { transform: scale(1.15); opacity: 0.4; }
-    }
+    /* Messages */
+    .chat-messages { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:12px; }
+    .lc-msg-row { display:flex; gap:8px; align-items:flex-end; }
+    .lc-msg-row.user { justify-content:flex-end; }
+    .lc-msg-row.consultant { justify-content:flex-start; }
+    .msg-avatar-sm { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#0611B1,#4285f4); display:flex; align-items:center; justify-content:center; color:white; font-size:0.7rem; font-weight:700; flex-shrink:0; }
+    .lc-bubble { max-width:72%; padding:10px 14px; border-radius:18px; font-size:0.92rem; line-height:1.5; word-break:break-word; animation:bubbleIn 0.2s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes bubbleIn { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none} }
+    .lc-bubble.user { background:linear-gradient(135deg,#0611B1,#4285f4); color:white; border-radius:18px 18px 4px 18px; }
+    .lc-bubble.consultant { background:var(--bg-card); color:var(--text); border:1px solid var(--border); border-radius:18px 18px 18px 4px; }
+    .bubble-time { font-size:0.68rem; color:var(--text-muted); margin-top:3px; }
+    .msg-row-user .bubble-time { text-align:right; }
+    .lc-system-msg { text-align:center; font-size:0.75rem; color:var(--text-muted); }
+    .lc-system-msg span { background:var(--bg-input); border-radius:50px; padding:4px 12px; display:inline-block; }
 
-    .splash-logo {
-      width: 110px;
-      height: 110px;
-      object-fit: contain;
-      position: relative;
-      z-index: 2;
-      animation: logoPop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
+    /* Typing indicator */
+    .typing-row { display:none; align-items:flex-end; gap:8px; }
+    .typing-row.show { display:flex; }
+    .typing-bubble { background:var(--bg-card); border:1px solid var(--border); border-radius:18px 18px 18px 4px; padding:10px 14px; display:flex; gap:4px; }
+    .typing-dot { width:6px; height:6px; background:var(--text-muted); border-radius:50%; animation:tdot 1.2s infinite; }
+    .typing-dot:nth-child(2){animation-delay:0.2s}.typing-dot:nth-child(3){animation-delay:0.4s}
+    @keyframes tdot { 0%,100%{transform:translateY(0);opacity:0.4}40%{transform:translateY(-4px);opacity:1} }
 
-    @keyframes logoPop {
-      from { opacity: 0; transform: scale(0.7); }
-      to   { opacity: 1; transform: scale(1);   }
-    }
+    /* Input */
+    .chat-input-area { background:var(--bg-card); border-top:1px solid var(--border); padding:16px 24px; flex-shrink:0; }
+    .quick-replies { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .qr-btn { background:var(--bg); border:1px solid var(--border); border-radius:50px; padding:5px 12px; font-family:inherit; font-size:0.78rem; cursor:pointer; color:var(--text-2); transition:all 0.2s; white-space:nowrap; }
+    .qr-btn:hover { border-color:var(--blue); color:var(--blue); background:rgba(6,17,177,0.05); }
+    .input-row { display:flex; gap:10px; align-items:flex-end; }
+    .consultant-input { flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:20px; padding:10px 16px; font-family:inherit; font-size:0.95rem; color:var(--text); outline:none; resize:none; min-height:42px; max-height:120px; line-height:1.5; transition:border-color 0.2s; }
+    .consultant-input:focus { border-color:var(--blue); }
+    .consultant-input::placeholder { color:var(--text-muted); }
+    .send-btn { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#0611B1,#4285f4); border:none; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.15s; flex-shrink:0; }
+    .send-btn:hover { transform:scale(1.06); }
+    .send-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
 
-    .splash-bar-track {
-      width: 120px;
-      height: 3px;
-      background: var(--border-color);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-
-    .splash-bar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
-      animation: fillBar 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    @keyframes fillBar {
-      0%   { width: 0%; }
-      60%  { width: 75%; }
-      90%  { width: 92%; }
-      100% { width: 100%; }
-    }
-
-    .splash-tagline {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      animation: fadeUp 0.6s 0.4s ease both;
-    }
-
-    .splash-skip {
-      position: absolute;
-      bottom: 40px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      opacity: 0;
-      animation: fadeUp 0.6s 1.5s ease both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0);   }
-    }
-
-    /* ════ SIDEBAR ════ */
-    .sidebar {
-      width: 280px;
-      background: var(--bg-sidebar);
-      display: flex;
-      flex-direction: column;
-      padding: 20px 16px;
-      transition: transform 0.3s ease, background 0.3s ease;
-      z-index: 100;
-    }
-
-    .new-chat-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--bg-hover);
-      border: none;
-      padding: 12px 16px;
-      border-radius: 50px;
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      cursor: pointer;
-      width: fit-content;
-      transition: background 0.2s;
-    }
-    .new-chat-btn:hover { background: var(--border-color); }
-
-    .sidebar-history {
-      margin-top: 24px;
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .sidebar-title {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-      padding-left: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      transition: background 0.2s;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      position: relative;
-    }
-    .history-item:hover { background: var(--bg-hover); }
-
-    .history-item .history-text {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .history-actions {
-      display: none;
-      gap: 4px;
-    }
-    .history-item:hover .history-actions {
-      display: flex;
-    }
-
-    .history-action-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      padding: 4px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s, background 0.2s;
-    }
-    .history-action-btn:hover {
-      color: var(--text-primary);
-      background: var(--bg-main);
-    }
-
-    .sidebar-search {
-      margin-bottom: 12px;
-      position: relative;
-    }
-
-    .sidebar-search input {
-      width: 100%;
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      border-radius: 50px;
-      padding: 8px 12px 8px 32px;
-      font-family: inherit;
-      font-size: 0.85rem;
-      color: var(--text-primary);
-      outline: none;
-    }
-    .sidebar-search input::placeholder { color: var(--text-muted); }
-    .sidebar-search i {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      width: 14px;
-      height: 14px;
-    }
-
-    /* ════ MAIN CONTENT ════ */
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    /* Header */
-    .header {
-      height: 72px; 
-      padding: 0 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.3s;
-    }
-    .header.scrolled {
-      border-bottom-color: var(--border-color);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .menu-toggle {
-      background: none; border: none; cursor: pointer;
-      color: var(--text-secondary); display: none;
-      padding: 8px; border-radius: 50%;
-    }
-    .menu-toggle:hover { background: var(--bg-sidebar); }
-
-    .brand-logo {
-      height: 48px; 
-      object-fit: contain;
-    }
-    
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .theme-toggle {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-secondary);
-      padding: 8px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, color 0.2s;
-    }
-    .theme-toggle:hover {
-      background: var(--bg-sidebar);
-      color: var(--text-primary);
-    }
-
-    .profile-btn {
-      background: none; border: none; padding: 0; cursor: pointer;
-      border-radius: 50%; transition: transform 0.2s;
-    }
-    .profile-btn:hover { transform: scale(1.05); }
-
-    .header-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: var(--brand-blue); color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 1rem; object-fit: cover;
-      border: 2px solid transparent; transition: border-color 0.2s;
-    }
-    .profile-btn:hover .header-avatar { border-color: var(--border-color); }
-
-    /* Scroll Area */
-    .scroll-area {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 20px 120px 20px;
-      perspective: 1000px;
-      scroll-behavior: smooth;
-    }
-
-    .content-container {
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Welcome Screen */
-    .welcome-screen {
-      margin-top: 10vh;
-      width: 100%;
-    }
-
-    .greeting {
-      font-size: 3.5rem;
-      font-weight: 500;
-      letter-spacing: -1px;
-      line-height: 1.2;
-      background: var(--gemini-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      background-size: 400% 100%;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .verified-badge {
-      width: 38px;
-      height: 38px;
-      margin-left: 12px;
-      vertical-align: middle;
-      display: inline-block;
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      font-size: 3.5rem;
-      font-weight: 500;
-      letter-spacing: -1px;
-      color: var(--text-muted);
-      line-height: 1.2;
-      margin-bottom: 40px;
-    }
-
-    .suggestions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-    }
-
-    /* ════ SUGGESTION CARDS ════ */
-    .suggestion-card {
-      position: relative;
-      background: var(--bg-sidebar);
-      padding: 16px;
-      border-radius: 16px;
-      cursor: pointer;
-      min-height: 120px;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.3s ease;
-      overflow: hidden;
-      box-shadow: 0 4px 6px var(--shadow-color);
-      border: 1px solid transparent;
-    }
-    .suggestion-card:hover {
-      border-color: var(--border-color);
-    }
-    
-    .suggestion-card.reset {
-      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
-    }
-
-    .water-drops {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 15 Q55 30 50 35 Q45 30 50 15" fill="%230611B1" opacity="0.1"/><path d="M20 50 Q24 62 20 68 Q16 62 20 50" fill="%234285f4" opacity="0.12"/><path d="M80 40 Q84 52 80 58 Q76 52 80 40" fill="%23E63946" opacity="0.08"/><path d="M35 80 Q38 90 35 95 Q32 90 35 80" fill="%239b72cb" opacity="0.1"/></svg>');
-      background-size: 100px 100px;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
-      z-index: 1;
-      transform: translateZ(10px);
-    }
-
-    .suggestion-card:hover .water-drops {
-      opacity: 1;
-      animation: flowWater 3s linear infinite;
-    }
-
-    @keyframes flowWater {
-      from { background-position: 0 -100px; }
-      to { background-position: 0 0px; }
-    }
-
-    .card-content {
-      position: relative;
-      z-index: 2;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transform: translateZ(20px); 
-    }
-
-    .suggestion-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
-    .suggestion-card .icon { align-self: flex-end; background: var(--bg-main); padding: 8px; border-radius: 50%; display: flex; }
-
-    /* Chat Area */
-    .chat-container { display: none; flex-direction: column; gap: 24px; padding-top: 20px; }
-
-    .message-row { display: flex; gap: 16px; max-width: 100%; position: relative; }
-    
-    .message-row.user { justify-content: flex-end; }
-    .msg-bubble.user {
-      background: var(--bg-user-msg);
-      padding: 12px 20px;
-      border-radius: 24px;
-      font-size: 1rem;
-      color: var(--text-primary);
-      max-width: 80%;
-      line-height: 1.5;
-      position: relative;
-    }
-
-    .message-row.ai { align-items: flex-start; }
-    .ai-avatar {
-      width: 36px; height: 36px; flex-shrink: 0;
-      border-radius: 50%; object-fit: contain;
-    }
-    .msg-bubble.ai {
-      padding: 4px 0;
-      font-size: 1rem;
-      color: var(--text-primary);
-      max-width: 100%;
-      line-height: 1.6;
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .message-time {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      text-align: right;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .message-row:hover .message-time {
-      opacity: 1;
-    }
-    .message-row.user .message-time {
-      text-align: left;
-      padding-left: 4px;
-    }
-
-    /* Markdown Styling */
-    .msg-bubble.ai p { margin-bottom: 12px; }
-    .msg-bubble.ai p:last-child { margin-bottom: 0; }
-    .msg-bubble.ai h1, .msg-bubble.ai h2, .msg-bubble.ai h3 { 
-      margin-top: 16px; margin-bottom: 8px; color: var(--brand-blue); font-weight: 700;
-    }
-    .msg-bubble.ai h3 { font-size: 1.1rem; }
-    .msg-bubble.ai ul, .msg-bubble.ai ol { 
-      margin-left: 20px; margin-bottom: 12px; 
-    }
-    .msg-bubble.ai li { 
-      display: list-item; margin-bottom: 4px; 
-    }
-    .msg-bubble.ai strong { color: var(--text-primary); font-weight: 700; }
-    
-    .msg-bubble.ai pre {
-      background: var(--code-bg);
-      border-radius: 12px;
-      padding: 16px;
-      overflow-x: auto;
-      margin-bottom: 12px;
-      position: relative;
-      border: 1px solid var(--border-color);
-    }
-    .msg-bubble.ai code {
-      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-      font-size: 0.9em;
-    }
-    .msg-bubble.ai pre code {
-      background: none;
-      padding: 0;
-      border-radius: 0;
-    }
-    .msg-bubble.ai :not(pre) > code {
-      background: var(--code-bg);
-      padding: 2px 6px;
-      border-radius: 6px;
-      color: var(--brand-red);
-    }
-
-    .code-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .code-lang {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: var(--text-muted);
+    /* Info sidebar on right (chat details) */
+    .chat-top-banner {
+      padding: 10px 24px;
+      background: rgba(52,168,83,0.08);
+      border-bottom: 1px solid rgba(52,168,83,0.2);
+      font-size: 0.82rem;
+      color: var(--green);
       font-weight: 600;
-    }
-    .copy-code-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: color 0.2s;
-    }
-    .copy-code-btn:hover { color: var(--text-primary); }
-
-    .thinking-container {
-      display: flex; align-items: center; gap: 12px;
-      color: var(--brand-blue); font-weight: 500; font-size: 0.95rem;
-    }
-
-    .loader-inline { display: flex; gap: 4px; }
-    .dot { width: 6px; height: 6px; background: var(--brand-blue); border-radius: 50%; animation: pulse 1.2s infinite; }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-    /* Message Actions */
-    .message-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .message-row.ai:hover .message-actions {
-      opacity: 1;
-    }
-    .msg-action-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .msg-action-btn:hover {
-      background: var(--bg-sidebar);
-      color: var(--text-primary);
-    }
-
-    /* Retry Card */
-    .retry-card {
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-      max-width: 400px;
-    }
-    .retry-card p {
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-      font-size: 0.95rem;
-    }
-
-    /* Callback Card */
-    .callback-card {
-      background: linear-gradient(135deg, rgba(66,133,244,0.08) 0%, rgba(233,74,98,0.06) 100%);
-      border: 1.5px solid var(--border-color);
-      border-radius: 16px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 8px;
-      animation: gateSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    .callback-icon {
-      width: 44px;
-      height: 44px;
-      background: var(--brand-blue);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      flex-shrink: 0;
-    }
-    .callback-content strong {
-      display: block;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    .callback-content p {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      margin: 0;
-    }
-    .callback-status {
-      display: inline-block;
-      margin-top: 6px;
-      padding: 2px 10px;
-      border-radius: 50px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    .callback-status.pending {
-      background: rgba(251, 188, 4, 0.15);
-      color: var(--warning);
-    }
-
-    /* Input Area */
-    .input-wrapper {
-      position: absolute; bottom: 0; left: 0; width: 100%;
-      background: linear-gradient(transparent, var(--bg-main) 30%);
-      padding: 20px; display: flex; justify-content: center; z-index: 500;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .input-box {
-      width: 100%; max-width: 800px; background: var(--bg-input);
-      border-radius: 32px; display: flex; align-items: flex-end;
-      padding: 10px 16px; gap: 12px;
-      border: 1px solid transparent;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .input-box:focus-within {
-      border-color: var(--brand-blue);
-      box-shadow: 0 0 0 3px rgba(6, 17, 177, 0.1);
-    }
-
-    .chat-input {
-      flex: 1; border: none; background: transparent; font-size: 1rem;
-      color: var(--text-primary); font-family: inherit; outline: none; padding: 8px 0;
-      resize: none;
-      min-height: 24px;
-      max-height: 200px;
-      line-height: 1.5;
-    }
-    .chat-input::placeholder { color: var(--text-secondary); }
-
-    .action-btn {
-      background: none; border: none; cursor: pointer; color: var(--text-primary); 
-      display: flex; align-items: center; justify-content: center;
-      width: 40px; height: 40px; border-radius: 50%; transition: background 0.2s;
-      flex-shrink: 0;
-      margin-bottom: 2px;
-    }
-    .action-btn:hover { background: rgba(0,0,0,0.05); }
-    [data-theme="dark"] .action-btn:hover { background: rgba(255,255,255,0.05); }
-
-    .image-preview {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-      max-width: 800px;
-    }
-    .image-preview-item {
-      position: relative;
-      width: 60px;
-      height: 60px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 2px solid var(--border-color);
-    }
-    .image-preview-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .image-preview-item button {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background: rgba(0,0,0,0.6);
-      border: none;
-      color: white;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 10px;
-    }
-
-    /* ════ AUTH MODAL / BOTTOM SHEET ════ */
-    .auth-overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
-      z-index: 1000; display: none; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.3s ease;
-    }
-
-    .auth-container {
-      background: var(--bg-main); padding: 40px 30px; border-radius: 24px;
-      width: 90%; max-width: 420px; text-align: center; position: relative;
-      transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    }
-
-    .close-auth-btn {
-      position: absolute; top: 16px; right: 16px; background: none; border: none;
-      cursor: pointer; color: var(--text-secondary); padding: 8px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; transition: background 0.2s;
-    }
-    .close-auth-btn:hover { background: var(--bg-input); }
-
-    .auth-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
-    .auth-subtitle { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 30px; line-height: 1.5; }
-
-    .google-btn {
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      width: 100%; padding: 14px; background: var(--bg-main); border: 1px solid var(--border-color);
-      border-radius: 50px; font-family: inherit; font-size: 1rem; font-weight: 500;
-      cursor: pointer; color: var(--text-primary); box-shadow: 0 2px 6px var(--shadow-color);
-      transition: background 0.2s, box-shadow 0.2s;
-    }
-    .google-btn:hover { background: var(--bg-sidebar); box-shadow: 0 4px 12px var(--shadow-color); }
-    .google-btn img { width: 24px; height: 24px; }
-
-    /* ════ CUSTOM ALERTS / DIALOGS ════ */
-    .dialog-overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
-      z-index: 2000; display: none; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.3s ease;
-    }
-
-    .dialog-container {
-      background: var(--bg-main); padding: 24px 24px 20px 24px; border-radius: 20px;
-      width: 90%; max-width: 340px; text-align: center; position: relative;
-      transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .dialog-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
-    .dialog-message { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
-    .dialog-actions { display: flex; gap: 12px; justify-content: center; }
-    
-    .dialog-btn {
-      flex: 1; padding: 10px 16px; border-radius: 50px; border: none; font-family: inherit;
-      font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: background 0.2s, color 0.2s;
-    }
-    .dialog-btn.secondary { background: var(--bg-input); color: var(--text-primary); }
-    .dialog-btn.secondary:hover { background: var(--bg-hover); }
-    .dialog-btn.primary { background: var(--brand-red); color: white; }
-    .dialog-btn.primary:hover { background: #c82333; }
-    .dialog-btn.primary-blue { background: var(--brand-blue); color: white; }
-    .dialog-btn.primary-blue:hover { background: #050c8a; }
-
-    /* ════ AUTH GATE CARD ════ */
-    .auth-gate-row { width: 100%; animation: gateSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    @keyframes gateSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .auth-gate-card { 
-      background: linear-gradient(135deg, rgba(66,133,244,0.08) 0%, rgba(233,74,98,0.06) 100%); 
-      border: 1.5px solid var(--border-color); 
-      border-radius: 20px; 
-      padding: 28px 24px 24px; 
-      text-align: center; 
-      position: relative; 
-      overflow: hidden; 
-    }
-    .auth-gate-card::before { 
-      content: ""; 
-      position: absolute; 
-      inset: 0; 
-      background: linear-gradient(135deg, rgba(66,133,244,0.05) 0%, rgba(233,74,98,0.04) 100%); 
-      pointer-events: none; 
-    }
-    .gate-lock-icon { 
-      width: 52px; 
-      height: 52px; 
-      background: linear-gradient(135deg, var(--brand-blue), #4285f4); 
-      border-radius: 50%; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      margin: 0 auto 16px; 
-      box-shadow: 0 4px 16px rgba(6,17,177,0.25); 
-    }
-    .auth-gate-card h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
-    .auth-gate-card p { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; max-width: 300px; margin-left: auto; margin-right: auto; }
-    .gate-sign-in-btn { 
-      display: inline-flex; 
-      align-items: center; 
-      gap: 10px; 
-      background: var(--brand-blue); 
-      color: white; 
-      border: none; 
-      border-radius: 50px; 
-      padding: 12px 28px; 
-      font-family: inherit; 
-      font-size: 0.95rem; 
-      font-weight: 600; 
-      cursor: pointer; 
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s; 
-      box-shadow: 0 4px 14px rgba(6,17,177,0.3); 
-    }
-    .gate-sign-in-btn:hover { background: #050c8a; transform: translateY(-1px); }
-    .input-box.locked { opacity: 0.5; pointer-events: none; }
-    .input-lock-hint { 
-      display: none; 
-      text-align: center; 
-      font-size: 0.82rem; 
-      color: var(--text-muted); 
-      margin-bottom: 6px; 
-    }
-    .input-lock-hint.visible { display: block; }
-
-    /* Scroll to bottom button */
-    .scroll-bottom-btn {
-      position: fixed;
-      bottom: 100px;
-      right: 24px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--brand-blue);
-      color: white;
-      border: none;
-      cursor: pointer;
       display: none;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(6,17,177,0.3);
-      z-index: 400;
-      transition: transform 0.2s, opacity 0.2s;
+      gap: 8px;
+      flex-shrink: 0;
     }
-    .scroll-bottom-btn.visible {
-      display: flex;
-      animation: fadeUp 0.3s ease;
-    }
-    .scroll-bottom-btn:hover {
-      transform: translateY(-2px);
-    }
+    .chat-top-banner.show { display: flex; }
 
-    /* ════ RESPONSIVE ════ */
+    /* Dialog */
+    .dialog-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s; }
+    .dialog-box { background:var(--bg-card);padding:24px;border-radius:20px;width:90%;max-width:340px;text-align:center;transform:scale(0.95);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+    .dialog-box h3 { font-size:1.2rem;font-weight:700;margin-bottom:8px; }
+    .dialog-box p { font-size:0.9rem;color:var(--text-2);margin-bottom:20px;line-height:1.5; }
+    .dialog-btns { display:flex;gap:10px; }
+    .d-btn { flex:1;padding:10px;border-radius:50px;border:none;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer; }
+    .d-btn.sec { background:var(--bg-input);color:var(--text); }
+    .d-btn.red { background:var(--red);color:white; }
+    .d-btn.blue { background:var(--blue);color:white; }
+
+    /* Notification toast */
+    .toast { position:fixed;bottom:24px;right:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:14px 18px;box-shadow:0 8px 24px var(--shadow);font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:10px;z-index:3000;transform:translateY(80px);opacity:0;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);max-width:320px; }
+    .toast.show { transform:translateY(0);opacity:1; }
+    .toast-icon { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .toast-icon.green { background:rgba(52,168,83,0.15);color:var(--green); }
+    .toast-icon.blue { background:rgba(6,17,177,0.1);color:var(--blue); }
+
     @media (max-width: 768px) {
-      .sidebar {
-        position: fixed; left: 0; top: 0; bottom: 0;
-        transform: translateX(-100%);
-      }
-      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 15px var(--shadow-color); }
-      .menu-toggle { display: block; }
-      .greeting, .subtitle { font-size: 2.2rem; }
-      .welcome-screen { margin-top: 5vh; }
-      .input-wrapper { padding: 10px 15px 15px 15px; background: var(--bg-main); }
-      
-      .auth-overlay { align-items: flex-end; }
-      .auth-container {
-        width: 100%; max-width: 100%; border-radius: 28px 28px 0 0;
-        transform: translateY(100%); 
-        padding-bottom: calc(120px + env(safe-area-inset-bottom));
-      }
-      
-      .suggestions-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-      .suggestion-card { transform: none !important; box-shadow: none !important; min-height: 100px; padding: 14px; }
-      .suggestion-card p { font-size: 0.85rem; }
-      .suggestion-card .icon { padding: 6px; }
-      .verified-badge { width: 30px; height: 30px; margin-left: 8px; }
-      
-      .message-actions { opacity: 1; }
-      .history-actions { display: flex; }
-      .message-time { opacity: 1; }
+      .main-grid { grid-template-columns: 1fr; }
+      .chat-panel { display: none; }
+      .chat-panel.mobile-show { display: flex; position: fixed; inset: 0; z-index: 500; }
     }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      .suggestion-card:hover {
-        transform: none !important;
-      }
-      .splash-bar-fill {
-        animation: none !important;
-        width: 100% !important;
-      }
-    }
-
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--text-muted);
-      border-radius: 99px;
-      opacity: 0.3;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-secondary);
-    }
-
-    /* ══════════════════════════════════════════
-       PWA INSTALL BANNER
-    ══════════════════════════════════════════ */
-    #pwa-install-popup {
-      position: fixed;
-      top: calc(env(safe-area-inset-top) + 72px);
-      left: 0; right: 0;
-      z-index: 49;
-      pointer-events: none;
-      display: none;
-      opacity: 0;
-      transform: translateY(-110%);
-      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
-    }
-    #pwa-install-popup.show {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    .pwa-banner-inner {
-      margin: 0 16px;
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      box-shadow: 0 8px 32px var(--shadow-color);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      touch-action: none;
-    }
-    .pwa-banner-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .pwa-banner-icon img {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
-      filter: brightness(0) invert(1);
-    }
-    .pwa-banner-content {
-      flex: 1;
-      min-width: 0;
-    }
-    .pwa-banner-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.2;
-    }
-    .pwa-banner-subtitle {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      line-height: 1.3;
-      margin-top: 2px;
-    }
-    .pwa-banner-install {
-      background: var(--brand-blue);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 8px 16px;
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      flex-shrink: 0;
-    }
-    .pwa-banner-install:hover {
-      background: #050c8a;
-      transform: translateY(-1px);
-    }
-    .pwa-banner-install:active {
-      transform: scale(0.95);
-    }
-    .pwa-banner-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s, background 0.2s;
-      flex-shrink: 0;
-    }
-    .pwa-banner-close:hover {
-      color: var(--text-primary);
-      background: var(--bg-hover);
-    }
-
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:99px}
   </style>
-<base target="_blank">
-<base target="_blank">
 </head>
 <body>
 
-  <!-- ════ PWA INSTALL BANNER ════ -->
-  <div id="pwa-install-popup">
-    <div class="pwa-banner-inner">
-      <div class="pwa-banner-icon">
-        <img src="https://i.postimg.cc/tRMK3mNK/Steward-logo.png" alt="Steward">
-      </div>
-      <div class="pwa-banner-content">
-        <p class="pwa-banner-title">Install Steward AI</p>
-        <p class="pwa-banner-subtitle">Add to home screen for quick access</p>
-      </div>
-      <button class="pwa-banner-install" id="pwaInstallBtn">Install</button>
-      <button class="pwa-banner-close" id="pwaDismissBtn">
-        <i data-feather="x" style="width:18px;height:18px;"></i>
-      </button>
-    </div>
-  </div>
-
-
-  <!-- ════ SPLASH SCREEN ════ -->
-  <div id="splashScreen">
-    <div class="splash-logo-wrap">
-      <div class="splash-ring-2"></div>
-      <div class="splash-ring"></div>
-      <img src="https://i.postimg.cc/tRMK3mNK/Steward-logo.png" class="splash-logo" alt="Steward">
-    </div>
-    <div class="splash-bar-track">
-      <div class="splash-bar-fill"></div>
-    </div>
-    <span class="splash-tagline">Rare Grade Tech</span>
-    <span class="splash-skip">Tap to skip</span>
-  </div>
-
-  <div class="dialog-overlay" id="dialogOverlay">
-    <div class="dialog-container" id="dialogContainer">
-      <h3 class="dialog-title" id="dialogTitle">Title</h3>
-      <p class="dialog-message" id="dialogMessage">Message</p>
-      <div class="dialog-actions" id="dialogActions"></div>
-    </div>
-  </div>
-
-  <div class="auth-overlay" id="authOverlay">
-    <div class="auth-container" id="authContainer">
-      <button class="close-auth-btn" id="closeAuthBtn">
-        <i data-feather="x" style="width:20px;height:20px;"></i>
-      </button>
-      <img src="https://i.postimg.cc/tRMK3mNK/Steward-logo.png" alt="Steward Logo" style="height: 54px; margin-bottom: 20px; object-fit: contain;">
-      <h2 class="auth-title">Welcome to Rare Grade Tech</h2>
-      <p class="auth-subtitle">Sign in to request repair quotes and save your chat history.</p>
-      
-      <button class="google-btn" id="googleSignInBtn">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-        Continue with Google
-      </button>
-    </div>
-  </div>
-
-  <aside class="sidebar" id="sidebar">
-    <button class="new-chat-btn" id="newChatBtn">
-      <i data-feather="plus" style="width: 20px; height: 20px;"></i>
-      New chat
+<!-- Auth Screen -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <img src="https://i.postimg.cc/tRMK3mNK/Steward-logo.png" alt="Logo">
+    <h1>Consultant Portal</h1>
+    <p>Sign in with your Rare Grade Tech Google account to access the live chat dashboard.</p>
+    <button class="google-btn" id="signInBtn">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+      Continue with Google
     </button>
-    
-    <div class="sidebar-history">
-      <div class="sidebar-title">
-        Recent
-      </div>
-      <div class="sidebar-search" id="sidebarSearch" style="display:none;">
-        <i data-feather="search"></i>
-        <input type="text" placeholder="Search chats..." id="historySearchInput">
-      </div>
-      <div id="sidebarHistoryList"></div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="https://i.postimg.cc/tRMK3mNK/Steward-logo.png" alt="Logo">
+      <span class="topbar-title">Consultant Dashboard</span>
     </div>
-  </aside>
-
-  <main class="main-wrapper">
-    <header class="header" id="mainHeader">
-      <div class="header-left">
-        <button class="menu-toggle" id="menuToggle">
-          <i data-feather="menu"></i>
-        </button>
-        <img src="https://i.postimg.cc/tRMK3mNK/Steward-logo.png" alt="Rare Grade Tech" class="brand-logo">
+    <div class="topbar-right">
+      <div class="status-pill" id="statusPill">
+        <span class="status-dot-pill"></span> Online
       </div>
-      
-      <div class="header-right">
-        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-          <i data-feather="moon" id="themeIcon"></i>
-        </button>
-        <button class="profile-btn" id="profileBtn">
-          <img id="header-avatar" class="header-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E">
-        </button>
+      <div class="consultant-info">
+        <img class="consultant-avatar" id="consultantAvatar" src="" alt="">
+        <span id="consultantName" style="font-weight:600;font-size:0.88rem;"></span>
       </div>
-    </header>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme"><i data-feather="moon" id="themeIcon"></i></button>
+      <button class="icon-btn" id="signOutBtn" title="Sign Out"><i data-feather="log-out"></i></button>
+    </div>
+  </div>
 
-    <div class="scroll-area" id="mainScroll">
-      <div class="content-container">
-        
-        <div class="welcome-screen" id="welcomeScreen">
-          <h1 class="greeting" id="greetingText">Hello there</h1>
-          <h2 class="subtitle">How can I help with your PC today?</h2>
-          
-          <div class="suggestions-grid" id="suggestionsGrid">
-            <div class="suggestion-card" data-prompt="My computer is running very slow and freezing. How can I fix this?">
-              <div class="water-drops"></div>
-              <div class="card-content">
-                  <p>Troubleshoot a slow or freezing computer</p>
-                  <div class="icon"><i data-feather="cpu" style="width:18px;height:18px;color:#4285f4;"></i></div>
-              </div>
-            </div>
-            <div class="suggestion-card" data-prompt="I need a quote to replace a shattered laptop screen.">
-              <div class="water-drops"></div>
-              <div class="card-content">
-                  <p>Get a quote for a laptop screen replacement</p>
-                  <div class="icon"><i data-feather="monitor" style="width:18px;height:18px;color:#d96570;"></i></div>
-              </div>
-            </div>
-            <div class="suggestion-card" data-prompt="My laptop keeps turning off randomly. What could be the issue?">
-              <div class="water-drops"></div>
-              <div class="card-content">
-                  <p>Diagnose sudden power or battery issues</p>
-                  <div class="icon"><i data-feather="battery-charging" style="width:18px;height:18px;color:#fbbc04;"></i></div>
-              </div>
-            </div>
-            <div class="suggestion-card" data-prompt="How do I remove a virus or malware from my Windows PC?">
-              <div class="water-drops"></div>
-              <div class="card-content">
-                  <p>Help removing viruses and malware</p>
-                  <div class="icon"><i data-feather="shield" style="width:18px;height:18px;color:#34a853;"></i></div>
-              </div>
-            </div>
-          </div>
+  <div class="main-grid">
+    <!-- Left: queue -->
+    <div class="queue-panel">
+      <div class="queue-header">
+        <h2>Live Chats</h2>
+        <div class="queue-tabs">
+          <button class="q-tab active" data-tab="waiting" onclick="switchTab('waiting')">
+            Queue <span class="q-tab-badge" id="waitingBadge"></span>
+          </button>
+          <button class="q-tab" data-tab="active" onclick="switchTab('active')">
+            Active <span class="q-tab-badge" id="activeBadge"></span>
+          </button>
+          <button class="q-tab" data-tab="closed" onclick="switchTab('closed')">Closed</button>
         </div>
-
-        <div class="chat-container" id="chatContainer"></div>
-
       </div>
-    </div>
-
-    <button class="scroll-bottom-btn" id="scrollBottomBtn">
-      <i data-feather="arrow-down" style="width:20px;height:20px;"></i>
-    </button>
-
-    <div class="input-wrapper">
-      <p class="input-lock-hint" id="inputLockHint">🔒 Sign in to keep the conversation going</p>
-      <div class="image-preview" id="imagePreview"></div>
-      <div class="input-box" id="inputBox">
-        <input type="file" id="fileInput" accept="image/*" style="display:none;">
-        <button class="action-btn" id="imageBtn" title="Attach image">
-          <i data-feather="image" style="width:20px;height:20px;"></i>
-        </button>
-        <textarea class="chat-input" id="userInput" placeholder="Ask Steward about computer repairs or support here..." rows="1" autocomplete="off"></textarea>
-        <button class="action-btn" id="sendBtn" title="Send message">
-          <i data-feather="send" style="width:20px;height:20px;"></i>
-        </button>
-      </div>
-    </div>
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, get, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getRemoteConfig, fetchAndActivate, getValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-remote-config.js";
-
-    // ════ SPLASH SCREEN DISMISS ════
-    const splash = document.getElementById('splashScreen');
-    let splashDismissed = false;
-    
-    function dismissSplash() {
-      if (splashDismissed) return;
-      splashDismissed = true;
-      splash.classList.add('hide');
-      setTimeout(() => { splash.remove(); }, 650);
-    }
-    
-    setTimeout(dismissSplash, 3000);
-    splash.addEventListener('click', dismissSplash);
-
-    feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-
-    // ════ THEME SYSTEM ════
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    
-    function updateThemeIcon() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      themeIcon.setAttribute('data-feather', isDark ? 'sun' : 'moon');
-      feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-    }
-    
-    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon();
-    
-    themeToggle.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-      updateThemeIcon();
-    });
-
-    // UI Logic
-    const sidebar = document.getElementById('sidebar');
-    const menuToggle = document.getElementById('menuToggle');
-    const welcomeScreen = document.getElementById('welcomeScreen');
-    const chatContainer = document.getElementById('chatContainer');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const mainScroll = document.getElementById('mainScroll');
-    const newChatBtn = document.getElementById('newChatBtn');
-    const sidebarHistoryList = document.getElementById('sidebarHistoryList');
-    const mainHeader = document.getElementById('mainHeader');
-    const scrollBottomBtn = document.getElementById('scrollBottomBtn');
-    const inputBox = document.getElementById('inputBox');
-    const inputLockHint = document.getElementById('inputLockHint');
-    const imageBtn = document.getElementById('imageBtn');
-    const fileInput = document.getElementById('fileInput');
-    const imagePreview = document.getElementById('imagePreview');
-
-    menuToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-        sidebar.classList.remove('open');
-      }
-    });
-
-    // Header scroll effect
-    mainScroll.addEventListener('scroll', () => {
-      if (mainScroll.scrollTop > 10) {
-        mainHeader.classList.add('scrolled');
-      } else {
-        mainHeader.classList.remove('scrolled');
-      }
-      
-      const isNearBottom = mainScroll.scrollHeight - mainScroll.scrollTop - mainScroll.clientHeight < 100;
-      if (!isNearBottom && chatContainer.style.display === 'flex' && chatContainer.children.length > 2) {
-        scrollBottomBtn.classList.add('visible');
-      } else {
-        scrollBottomBtn.classList.remove('visible');
-      }
-    });
-    
-    scrollBottomBtn.addEventListener('click', () => {
-      mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
-    });
-
-    // --- 3D PARALLAX EFFECT ---
-    function initParallaxCards() {
-        if(window.innerWidth <= 768) return; 
-        const cards = document.querySelectorAll('.suggestion-card');
-        cards.forEach(card => {
-            card.addEventListener('mousemove', e => {
-                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-                card.classList.remove('reset');
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -12; 
-                const rotateY = ((x - centerX) / centerX) * 12;
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-                card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px var(--shadow-color)`;
-            });
-            card.addEventListener('mouseleave', () => {
-                card.classList.add('reset');
-                card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-                card.style.boxShadow = `0 4px 6px var(--shadow-color)`;
-            });
-        });
-    }
-    initParallaxCards();
-
-    // Suggestion card clicks
-    document.querySelectorAll('.suggestion-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const prompt = card.getAttribute('data-prompt');
-        if (prompt) {
-          userInput.value = prompt;
-          window.handleSend();
-        }
-      });
-    });
-
-    // --- CUSTOM DIALOG UI LOGIC ---
-    const dialogOverlay = document.getElementById('dialogOverlay');
-    const dialogContainer = document.getElementById('dialogContainer');
-    const dialogTitle = document.getElementById('dialogTitle');
-    const dialogMessage = document.getElementById('dialogMessage');
-    const dialogActions = document.getElementById('dialogActions');
-
-    window.showDialog = function(title, message, buttons) {
-        dialogTitle.innerText = title;
-        dialogMessage.innerText = message;
-        dialogActions.innerHTML = '';
-        buttons.forEach(btn => {
-            const buttonEl = document.createElement('button');
-            buttonEl.className = `dialog-btn ${btn.type || 'secondary'}`;
-            buttonEl.innerText = btn.text;
-            buttonEl.onclick = () => {
-                window.closeDialog();
-                if(btn.onClick) btn.onClick();
-            };
-            dialogActions.appendChild(buttonEl);
-        });
-        dialogOverlay.style.display = 'flex';
-        setTimeout(() => {
-            dialogOverlay.style.opacity = '1';
-            dialogContainer.style.transform = 'scale(1)';
-        }, 10);
-    };
-
-    window.closeDialog = function() {
-        dialogOverlay.style.opacity = '0';
-        dialogContainer.style.transform = 'scale(0.95)';
-        setTimeout(() => { dialogOverlay.style.display = 'none'; }, 300);
-    };
-
-    // --- FIREBASE CONFIG (PRESERVED EXACTLY) ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-      authDomain: "fire-b-a8878.firebaseapp.com",
-      projectId: "fire-b-a8878",
-      databaseURL: "https://fire-b-a8878-default-rtdb.firebaseio.com",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const remoteConfig = getRemoteConfig(app);
-    remoteConfig.settings.minimumFetchIntervalMillis = 0;
-
-    // --- AUTH & STATE ---
-    const authOverlay = document.getElementById('authOverlay');
-    const authContainer = document.getElementById('authContainer');
-    const closeAuthBtn = document.getElementById('closeAuthBtn');
-    const profileBtn = document.getElementById('profileBtn');
-    const googleSignInBtn = document.getElementById('googleSignInBtn');
-    
-    let currentUser = null;
-    let guestPromptCount = 0;
-    let currentChatId = null; 
-    let pendingImage = null;
-
-    const SYSTEM_PROMPT = { 
-        role: "system", 
-        content: `You are Steward, a professional technical support and IT repair consultant from Rare Grade Tech. 
-        YOUR GOALS:
-        1. Greet users warmly and proactively drive the conversation toward assisting with computer-related tech support, software troubleshooting, or hardware repair quotes.
-        2. If a user asks about non-computer topics, politely decline and provide the support number: +27 61 527 0749.
-        3. CALLBACK FEATURE: Always let users know they can request a "call back" or phone call if their issue is complex or they want a direct quote or go to www.raregradetech.com. 
-        4. If a user requests a call back, ask for their phone number and a brief summary of their issue.
-        5. Once they provide their phone number, you MUST explicitly reply in the chat with feedback letting the client know that their details have been sent to the admin team and an agent will call them back shortly.
-        6. At the very end of your response, you MUST append this exact hidden tag: [CALLBACK: phone_number | brief_issue_summary].
-        Keep responses clear, professional, empathetic, and well-formatted using markdown.`
-    };
-    
-    window.chatHistory = [SYSTEM_PROMPT];
-
-    const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='background-color:%23E3E3E3'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
-    const VERIFIED_BADGE_SVG = `
-      <svg class="verified-badge" viewBox="0 0 24 24" aria-label="Verified account">
-        <path fill="#1D9BF0" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.827 2.766 2.057 3.465-.056.297-.09.6-.09.914 0 2.21 1.71 4 3.918 4 .556 0 1.082-.114 1.56-.318.572 1.39 1.95 2.37 3.52 2.37s2.948-.98 3.52-2.37c.478.204 1.004.318 1.56.318 2.21 0 3.918-1.79 3.918-4 0-.314-.033-.617-.09-.914 1.23-.698 2.057-2.004 2.057-3.465z"></path>
-        <path fill="#FFFFFF" d="M15.34 8.36l-5.8 5.8-2.6-2.6c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4l3.3 3.3c.2.2.5.3.7.3s.5-.1.7-.3l6.5-6.5c.4-.4.4-1 0-1.4s-1-.4-1.4 0z"></path>
-      </svg>
-    `;
-
-    window.openAuth = function() {
-      authOverlay.style.display = 'flex';
-      setTimeout(() => {
-        authOverlay.style.opacity = '1';
-        authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(0)' : 'translateY(0)';
-      }, 10);
-    };
-
-    window.closeAuth = function() {
-      authOverlay.style.opacity = '0';
-      authContainer.style.transform = window.innerWidth <= 768 ? 'translateY(100%)' : 'translateY(30px)';
-      setTimeout(() => { authOverlay.style.display = 'none'; }, 300);
-    };
-
-    closeAuthBtn.addEventListener('click', window.closeAuth);
-    authOverlay.addEventListener('click', (e) => { if(e.target === authOverlay) window.closeAuth(); });
-
-    profileBtn.addEventListener('click', () => {
-        if (currentUser) {
-            window.showDialog("Sign Out", "Do you want to sign out of Rare Grade Tech?", [
-                { text: "Cancel", type: "secondary" },
-                { text: "Sign Out", type: "primary", onClick: () => signOut(auth) }
-            ]);
-        } else {
-            window.openAuth();
-        }
-    });
-
-    const googleProvider = new GoogleAuthProvider();
-    googleSignInBtn.addEventListener('click', async () => {
-        try {
-            await signInWithPopup(auth, googleProvider);
-            window.closeAuth();
-        } catch (error) {
-            window.showDialog("Sign In Failed", "We couldn't sign you in. Please try again.", [ { text: "OK", type: "primary-blue" } ]);
-        }
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      const avatarImg = document.getElementById('header-avatar');
-      const greetingText = document.getElementById('greetingText');
-      
-      if (user) {
-        avatarImg.src = user.photoURL || DEFAULT_AVATAR;
-        const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
-        greetingText.innerHTML = `Hello, ${firstName} ${VERIFIED_BADGE_SVG}`;
-        guestPromptCount = 0;
-        unlockInput();
-        const gateEl = document.getElementById('auth-gate-card');
-        if (gateEl) gateEl.remove();
-        loadSidebarChats(user.uid);
-        document.getElementById('sidebarSearch').style.display = 'block';
-      } else {
-        avatarImg.src = DEFAULT_AVATAR;
-        greetingText.innerHTML = `Hello there`;
-        sidebarHistoryList.innerHTML = '';
-        document.getElementById('sidebarSearch').style.display = 'none';
-        guestPromptCount = 0;
-        unlockInput();
-        startNewChat();
-      }
-    });
-
-    // --- CHAT HISTORY / FIREBASE SAVING ---
-    async function loadSidebarChats(uid) {
-        const chatsRef = ref(db, `chats/${uid}`);
-        const snap = await get(chatsRef);
-        sidebarHistoryList.innerHTML = '';
-        
-        if (snap.exists()) {
-            const chats = [];
-            snap.forEach(childSnap => {
-                chats.push({ id: childSnap.key, ...childSnap.val() });
-            });
-            chats.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-            
-            chats.forEach(chat => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                  <i data-feather="message-square" style="width: 16px; height: 16px; flex-shrink:0;"></i>
-                  <span class="history-text">${window.escapeHtml(chat.title || 'New Chat')}</span>
-                  <div class="history-actions">
-                    <button class="history-action-btn" title="Rename" onclick="window.editChatTitle('${chat.id}', event)">
-                      <i data-feather="edit-2" style="width:14px;height:14px;"></i>
-                    </button>
-                    <button class="history-action-btn" title="Delete" onclick="window.deleteChat('${chat.id}', event)">
-                      <i data-feather="trash-2" style="width:14px;height:14px;"></i>
-                    </button>
-                  </div>
-                `;
-                div.onclick = () => loadSpecificChat(chat.id, uid);
-                sidebarHistoryList.appendChild(div);
-            });
-            feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-        }
-    }
-
-    window.deleteChat = async function(chatId, event) {
-        if (event) event.stopPropagation();
-        window.showDialog("Delete Chat", "Are you sure you want to delete this conversation?", [
-            { text: "Cancel", type: "secondary" },
-            { text: "Delete", type: "primary", onClick: async () => {
-                if (currentUser) {
-                    await set(ref(db, `chats/${currentUser.uid}/${chatId}`), null);
-                    loadSidebarChats(currentUser.uid);
-                    if (currentChatId === chatId) startNewChat();
-                }
-            }}
-        ]);
-    };
-
-    window.editChatTitle = async function(chatId, event) {
-        if (event) event.stopPropagation();
-        const chatRef = ref(db, `chats/${currentUser.uid}/${chatId}`);
-        const snap = await get(chatRef);
-        if (!snap.exists()) return;
-        
-        const currentTitle = snap.val().title || 'New Chat';
-        const newTitle = prompt('Rename conversation:', currentTitle);
-        if (newTitle && newTitle.trim() && newTitle.trim() !== currentTitle) {
-            await set(ref(db, `chats/${currentUser.uid}/${chatId}/title`), newTitle.trim());
-            loadSidebarChats(currentUser.uid);
-        }
-    };
-
-    async function loadSpecificChat(chatId, uid) {
-        if(window.innerWidth <= 768) sidebar.classList.remove('open');
-        
-        const chatRef = ref(db, `chats/${uid}/${chatId}`);
-        const snap = await get(chatRef);
-        
-        if (snap.exists()) {
-            const chatData = snap.val();
-            currentChatId = chatId;
-            window.chatHistory = chatData.messages || [SYSTEM_PROMPT];
-            
-            welcomeScreen.style.display = 'none';
-            chatContainer.style.display = 'flex';
-            chatContainer.innerHTML = '';
-            
-            for (let i = 0; i < window.chatHistory.length; i++) {
-                const msg = window.chatHistory[i];
-                if (msg.role === 'system') continue;
-                
-                const time = msg.timestamp ? formatTime(msg.timestamp) : '';
-                
-                if (msg.role === 'user') {
-                    chatContainer.insertAdjacentHTML('beforeend', `
-                        <div class="message-row user">
-                            <div>
-                                <div class="msg-bubble user">${window.escapeHtml(msg.content)}</div>
-                                ${time ? `<div class="message-time">${time}</div>` : ''}
-                            </div>
-                        </div>`);
-                } else if (msg.role === 'assistant') {
-                    const parsedHTML = window.parseMarkdownToHTML(msg.content);
-                    const messageId = 'msg-' + Math.random().toString(36).substr(2, 9);
-                    chatContainer.insertAdjacentHTML('beforeend', `
-                        <div class="message-row ai">
-                            <img src="https://i.postimg.cc/Wz7yBXJQ/steward-icon.png" class="ai-avatar" alt="AI">
-                            <div style="flex:1;min-width:0;">
-                                <div class="msg-bubble ai" id="${messageId}">${parsedHTML}</div>
-                                <div class="message-actions">
-                                    <button class="msg-action-btn" onclick="window.copyMessage('${messageId}')">
-                                        <i data-feather="copy" style="width:14px;height:14px;"></i> Copy
-                                    </button>
-                                    <button class="msg-action-btn" onclick="window.regenerateResponse()">
-                                        <i data-feather="refresh-cw" style="width:14px;height:14px;"></i> Retry
-                                    </button>
-                                </div>
-                                ${time ? `<div class="message-time">${time}</div>` : ''}
-                            </div>
-                        </div>`);
-                }
-            }
-            feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-            mainScroll.scrollTop = mainScroll.scrollHeight;
-        }
-    }
-
-    async function saveCurrentChat() {
-        if (!currentUser) return;
-        const uid = currentUser.uid;
-        
-        if (!currentChatId) {
-            const newChatRef = push(ref(db, `chats/${uid}`));
-            currentChatId = newChatRef.key;
-        }
-        
-        const userMsg = window.chatHistory.find(m => m.role === 'user');
-        let title = "New Conversation";
-        if (userMsg) {
-            title = userMsg.content.substring(0, 30);
-            if (userMsg.content.length > 30) title += '...';
-        }
-        
-        await set(ref(db, `chats/${uid}/${currentChatId}`), {
-            title: title,
-            updatedAt: serverTimestamp(),
-            messages: window.chatHistory
-        });
-        
-        loadSidebarChats(uid);
-    }
-
-    function startNewChat() {
-        currentChatId = null;
-        window.chatHistory = [SYSTEM_PROMPT];
-        chatContainer.innerHTML = '';
-        welcomeScreen.style.display = 'block';
-        chatContainer.style.display = 'none';
-        if (window.innerWidth <= 768) sidebar.classList.remove('open');
-        userInput.value = '';
-        userInput.style.height = 'auto';
-        pendingImage = null;
-        imagePreview.innerHTML = '';
-    }
-    
-    newChatBtn.onclick = startNewChat;
-
-    // --- API KEYS ---
-    const API_BASE = "https://api.x.ai/v1";
-    let XAI_API_KEY = "";
-
-    async function loadKey() {
-      try {
-        await fetchAndActivate(remoteConfig);
-        XAI_API_KEY = getValue(remoteConfig, 'xai_api_key').asString();
-      } catch (e) { console.error("Key Load Error", e); }
-    }
-    loadKey();
-
-    window.activateChat = function() { 
-        welcomeScreen.style.display = 'none'; 
-        chatContainer.style.display = 'flex'; 
-    };
-    
-    window.setPrompt = function(text) { 
-        userInput.value = text; 
-        window.handleSend(); 
-    };
-
-    window.escapeHtml = function(text) {
-        if (!text) return '';
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    };
-
-    window.parseMarkdownToHTML = function(text) {
-        if (!text) return '';
-        
-        let html = window.escapeHtml(text);
-        
-        // Code blocks (fenced) - process first and store
-        const codeBlocks = [];
-        html = html.replace(/```(\w*)\n?([\s\S]*?)```/gm, (match, lang, code) => {
-            const id = 'CODE-' + Math.random().toString(36).substr(2, 9);
-            codeBlocks.push({ id, lang: lang || 'code', code: code.trim() });
-            return id;
-        });
-        
-        // Headers
-        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-        
-        // Bold and italic
-        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Lists - wrap consecutive items
-        const lines = html.split('\n');
-        let result = [];
-        let inList = false;
-        
-        for (let line of lines) {
-            const listMatch = line.match(/^\s*[-*] (.*$)/);
-            if (listMatch) {
-                if (!inList) {
-                    result.push('<ul>');
-                    inList = true;
-                }
-                result.push('<li>' + listMatch[1] + '</li>');
-            } else {
-                if (inList) {
-                    result.push('</ul>');
-                    inList = false;
-                }
-                result.push(line);
-            }
-        }
-        if (inList) result.push('</ul>');
-        html = result.join('\n');
-        
-        // Inline code
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        
-        // Paragraphs
-        const paragraphs = html.split('\n\n');
-        html = paragraphs.map(p => {
-            p = p.trim();
-            if (!p) return '';
-            if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('</ul') || p.startsWith('<li') || p.startsWith('CODE-')) {
-                return p;
-            }
-            if (p.startsWith('<') && !p.startsWith('<code') && !p.startsWith('<em') && !p.startsWith('<strong')) {
-                return p;
-            }
-            return '<p>' + p + '</p>';
-        }).join('\n');
-        
-        // Restore code blocks
-        codeBlocks.forEach(({ id, lang, code }) => {
-            const blockHTML = `
-              <div class="code-header">
-                <span class="code-lang">${lang}</span>
-                <button class="copy-code-btn" onclick="window.copyCode(this)">
-                  <i data-feather="copy" style="width:14px;height:14px;"></i> Copy
-                </button>
-              </div>
-              <pre><code>${code}</code></pre>
-            `;
-            html = html.replace(id, blockHTML);
-        });
-        
-        // Clean up breaks inside tags
-        html = html.replace(/<\/(h1|h2|h3|li|ul|pre|p)>\s*<br\s*\/?>/gi, '</$1>');
-        html = html.replace(/<br\s*\/?>\s*<(h1|h2|h3|ul|pre|p)/gi, '<$1');
-        
-        return html;
-    };
-
-    window.copyCode = function(btn) {
-        const pre = btn.closest('.msg-bubble.ai, .code-header').parentElement.querySelector('pre');
-        if (pre) {
-            const code = pre.innerText;
-            navigator.clipboard.writeText(code).then(() => {
-                const original = btn.innerHTML;
-                btn.innerHTML = '<i data-feather="check" style="width:14px;height:14px;"></i> Copied';
-                feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-                setTimeout(() => {
-                    btn.innerHTML = original;
-                    feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-                }, 2000);
-            });
-        }
-    };
-
-    window.copyMessage = function(messageId) {
-        const el = document.getElementById(messageId);
-        if (el) {
-            const text = el.innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                window.showDialog("Copied", "Message copied to clipboard.", [{ text: "OK", type: "primary-blue" }]);
-            });
-        }
-    };
-
-    window.regenerateResponse = async function() {
-        const lastUserMsg = [...window.chatHistory].reverse().find(m => m.role === 'user');
-        if (lastUserMsg) {
-            userInput.value = lastUserMsg.content;
-            await window.handleSend();
-        }
-    };
-
-    window.typeHTML = async function(element, htmlString, speed = 5) {
-        if (htmlString.includes('<pre')) {
-            element.innerHTML = htmlString;
-            feather.replace();
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-            mainScroll.scrollTop = mainScroll.scrollHeight;
-            return;
-        }
-        
-        element.innerHTML = '';
-        const parts = htmlString.split(/(<[^>]+>)/g); 
-        for (let part of parts) {
-            if (!part) continue;
-            if (part.startsWith('<')) {
-                element.innerHTML += part;
-            } else {
-                for (let i = 0; i < part.length; i++) {
-                    if(part[i] === '&') {
-                        let entityEnd = part.indexOf(';', i);
-                        if(entityEnd !== -1) {
-                            element.innerHTML += part.substring(i, entityEnd + 1);
-                            i = entityEnd;
-                            continue;
-                        }
-                    }
-                    element.innerHTML += part[i];
-                    await new Promise(r => setTimeout(r, speed));
-                    mainScroll.scrollTop = mainScroll.scrollHeight;
-                }
-            }
-        }
-    };
-
-    function formatTime(timestamp) {
-        if (!timestamp) return '';
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    // ════ TEXTAREA AUTO-RESIZE ════
-    userInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-    });
-
-    // ════ IMAGE UPLOAD UI ════
-    imageBtn.addEventListener('click', () => fileInput.click());
-    
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            pendingImage = file;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                imagePreview.innerHTML = `
-                    <div class="image-preview-item">
-                        <img src="${event.target.result}" alt="Preview">
-                        <button onclick="window.clearImage()" title="Remove">×</button>
-                    </div>
-                `;
-            };
-            reader.readAsDataURL(file);
-        }
-        fileInput.value = '';
-    });
-    
-    window.clearImage = function() {
-        pendingImage = null;
-        imagePreview.innerHTML = '';
-    };
-
-    // ════ GUEST GATE HELPERS ════
-    function lockInput() {
-      inputBox.classList.add("locked");
-      inputLockHint.classList.add("visible");
-    }
-
-    function unlockInput() {
-      inputBox.classList.remove("locked");
-      inputLockHint.classList.remove("visible");
-    }
-
-    function showAuthGateCard() {
-      const gateId = "auth-gate-card";
-      if (document.getElementById(gateId)) return;
-      chatContainer.insertAdjacentHTML("beforeend", `
-        <div class="auth-gate-row" id="${gateId}">
-          <div class="auth-gate-card">
-            <div class="gate-lock-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            </div>
-            <h3>You have reached your free limit</h3>
-            <p>Sign in with Google to keep chatting with Steward and save your conversation history.</p>
-            <button class="gate-sign-in-btn" onclick="window.openAuth()">
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;" alt="Google">
-              Sign in to continue
-            </button>
-          </div>
+      <div class="queue-list" id="queueList">
+        <div class="queue-empty">
+          <i data-feather="inbox" style="width:48px;height:48px;"></i>
+          <p>No chats yet.<br>Waiting for customers...</p>
         </div>
-      `);
-      mainScroll.scrollTop = mainScroll.scrollHeight;
-    }
+      </div>
+    </div>
 
-    // ════ KEYBOARD SHORTCUTS ════
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            window.closeDialog();
-            window.closeAuth();
-            sidebar.classList.remove('open');
-        }
-        if (e.key === '/' && document.activeElement !== userInput && !e.ctrlKey && !e.metaKey) {
-            e.preventDefault();
-            userInput.focus();
-        }
-    });
-    
-    userInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            window.handleSend();
-        }
-    });
+    <!-- Right: chat -->
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-empty-state" id="chatEmptyState">
+        <i data-feather="message-circle" style="width:64px;height:64px;"></i>
+        <p style="font-size:0.95rem;">Select a chat from the queue to get started</p>
+      </div>
 
-    // ════ MAIN SEND LOGIC ════
-    window.handleSend = async function() {
-      let prompt = userInput.value.trim();
-      
-      if (pendingImage) {
-          prompt += `\n\n[User attached image: ${pendingImage.name}]`;
-          pendingImage = null;
-          imagePreview.innerHTML = '';
-      }
-      
-      if (!prompt || !XAI_API_KEY) return;
-
-      if (!currentUser && guestPromptCount >= 3) {
-        showAuthGateCard();
-        lockInput();
-        return;
-      }
-
-      activateChat();
-      
-      const userTimestamp = Date.now();
-      
-      chatContainer.insertAdjacentHTML('beforeend', `
-        <div class="message-row user">
+      <!-- Active chat view (hidden until selected) -->
+      <div id="activeChatView" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="chat-top" id="chatTop">
+          <div class="chat-user-info">
+            <div class="chat-user-avatar" id="chatUserAvatar">?</div>
             <div>
-                <div class="msg-bubble user">${window.escapeHtml(prompt)}</div>
-                <div class="message-time">${formatTime(userTimestamp)}</div>
-            </div>
-        </div>`);
-      
-      const loaderId = 'loader-' + Date.now();
-      chatContainer.insertAdjacentHTML('beforeend', `
-        <div class="message-row ai" id="${loaderId}">
-            <img src="https://i.postimg.cc/Wz7yBXJQ/steward-icon.png" class="ai-avatar" alt="AI">
-            <div class="msg-bubble ai">
-                <div class="thinking-container">
-                    <span id="thinkingText-${loaderId}">Steward is thinking</span>
-                    <div class="loader-inline">
-                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                    </div>
-                </div>
-            </div>
-        </div>`);
-      
-      userInput.value = '';
-      userInput.style.height = 'auto';
-      mainScroll.scrollTop = mainScroll.scrollHeight;
-      
-      const thinkingTextEl = document.getElementById(`thinkingText-${loaderId}`);
-      const thinkingTimers = [
-          setTimeout(() => { if(thinkingTextEl) thinkingTextEl.textContent = 'Steward is researching...'; }, 3000),
-          setTimeout(() => { if(thinkingTextEl) thinkingTextEl.textContent = 'Steward is typing...'; }, 8000)
-      ];
-
-      try {
-        chatHistory.push({ role: "user", content: prompt, timestamp: userTimestamp });
-        saveCurrentChat();
-        
-        const res = await fetch(`${API_BASE}/chat/completions`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${XAI_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning", 
-                messages: chatHistory
-            })
-        });
-
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        
-        thinkingTimers.forEach(t => clearTimeout(t));
-        
-        if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
-
-        let aiMessage = data.choices[0].message.content;
-        const aiTimestamp = Date.now();
-        
-        const callbackRegex = /\[CALLBACK:\s*(.*?)\s*\|\s*(.*?)\]/i;
-        const match = aiMessage.match(callbackRegex);
-        
-        if (match) {
-            const phoneNumber = match[1].trim();
-            const issueSummary = match[2].trim();
-            aiMessage = aiMessage.replace(callbackRegex, '').trim();
-            
-            try {
-                const callbacksRef = ref(db, 'callbacks');
-                await push(callbacksRef, {
-                    phone: phoneNumber,
-                    issue: issueSummary,
-                    uid: currentUser ? currentUser.uid : 'guest',
-                    name: currentUser ? currentUser.displayName : 'Guest User',
-                    status: 'pending',
-                    timestamp: serverTimestamp()
-                });
-                
-                chatContainer.insertAdjacentHTML('beforeend', `
-                  <div class="message-row ai">
-                    <div style="width:36px;flex-shrink:0;"></div>
-                    <div class="callback-card">
-                        <div class="callback-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        </div>
-                        <div class="callback-content">
-                            <strong>Callback Requested</strong>
-                            <p>A Rare Grade Tech agent will call you at ${phoneNumber} shortly.</p>
-                            <span class="callback-status pending">Pending</span>
-                        </div>
-                    </div>
-                  </div>
-                `);
-                
-                window.showDialog(
-                    "Callback Requested", 
-                    `We have sent your request to our admin team. A Rare Grade Tech agent will call you at ${phoneNumber} shortly.`,
-                    [ { text: "OK", type: "primary-blue" } ]
-                );
-            } catch(e) { console.error("Failed to save callback:", e); }
-        }
-
-        chatHistory.push({ role: "assistant", content: aiMessage, timestamp: aiTimestamp });
-        saveCurrentChat(); 
-
-        const parsedHTML = window.parseMarkdownToHTML(aiMessage);
-        const messageId = 'msg-' + Date.now();
-        
-        chatContainer.insertAdjacentHTML('beforeend', `
-          <div class="message-row ai">
-            <img src="https://i.postimg.cc/Wz7yBXJQ/steward-icon.png" class="ai-avatar" alt="AI">
-            <div style="flex:1;min-width:0;">
-                <div class="msg-bubble ai" id="${messageId}"></div>
-                <div class="message-actions">
-                    <button class="msg-action-btn" onclick="window.copyMessage('${messageId}')">
-                        <i data-feather="copy" style="width:14px;height:14px;"></i> Copy
-                    </button>
-                    <button class="msg-action-btn" onclick="window.regenerateResponse()">
-                        <i data-feather="refresh-cw" style="width:14px;height:14px;"></i> Retry
-                    </button>
-                </div>
-                <div class="message-time">${formatTime(aiTimestamp)}</div>
-            </div>
-          </div>`);
-
-        const targetElement = document.getElementById(messageId);
-        await window.typeHTML(targetElement, parsedHTML, 5);
-        feather.replace();
-
-        if (navigator.vibrate) navigator.vibrate(200);
-
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
-    });
-
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
-        }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
-      }
-    });
-
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
-
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
-
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
-
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
-    }
-
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
-      });
-    }
-
-
-        if (!currentUser) {
-          guestPromptCount++;
-          if (guestPromptCount >= 3) {
-            showAuthGateCard();
-            lockInput();
-          }
-        }
-
-      } catch (err) {
-        thinkingTimers.forEach(t => clearTimeout(t));
-        if(document.getElementById(loaderId)) document.getElementById(loaderId).remove();
-        
-        const retryId = 'retry-' + Date.now();
-        chatContainer.insertAdjacentHTML('beforeend', `
-          <div class="message-row ai" id="${retryId}">
-            <img src="https://i.postimg.cc/Wz7yBXJQ/steward-icon.png" class="ai-avatar" alt="AI">
-            <div class="retry-card">
-                <p>Steward lost connection. Would you like to try again?</p>
-                <button class="dialog-btn primary-blue" onclick="window.retryLastMessage('${retryId}')">
-                    <i data-feather="refresh-cw" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:6px;"></i> Retry
-                </button>
+              <div class="chat-user-name" id="chatUserName">—</div>
+              <div class="chat-user-email" id="chatUserEmail">—</div>
             </div>
           </div>
-        `);
-        feather.replace();
+          <div class="chat-actions" id="chatActions"></div>
+        </div>
+        <div class="chat-top-banner" id="chatTopBanner">
+          <i data-feather="check-circle" style="width:16px;height:16px;"></i>
+          <span id="chatBannerText">Chat active</span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="typing-row" id="userTypingRow">
+          <div class="msg-avatar-sm">U</div>
+          <div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+        </div>
+        <div class="chat-input-area" id="chatInputArea" style="display:none;">
+          <div class="quick-replies">
+            <button class="qr-btn" onclick="useQuickReply('Hello! How can I help you today?')">👋 Greet</button>
+            <button class="qr-btn" onclick="useQuickReply('Please give me a moment to look into that for you.')">⏱ One moment</button>
+            <button class="qr-btn" onclick="useQuickReply('Thank you for contacting Rare Grade Tech. Is there anything else I can help you with?')">✅ Wrap up</button>
+            <button class="qr-btn" onclick="useQuickReply('I\\'ll need to escalate this to a senior technician. They will reach out to you shortly.')">🔺 Escalate</button>
+          </div>
+          <div class="input-row">
+            <textarea class="consultant-input" id="consultantInput" placeholder="Type a reply..." rows="1"></textarea>
+            <button class="send-btn" id="consultantSendBtn"><i data-feather="send" style="width:16px;height:16px;"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    // ══════════════════════════════════════════
-    // PWA INSTALLATION LOGIC
-    // ══════════════════════════════════════════
-    let deferredPrompt;
-    const pwaPopup = document.getElementById('pwa-install-popup');
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-    let pwaStartY = 0;
+<!-- Dialog -->
+<div class="dialog-overlay" id="dialogOverlay">
+  <div class="dialog-box" id="dialogBox">
+    <h3 id="dialogTitle"></h3>
+    <p id="dialogMsg"></p>
+    <div class="dialog-btns" id="dialogBtns"></div>
+  </div>
+</div>
 
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show popup on every load until installed
-      if (!localStorage.getItem('pwa_installed')) {
-        setTimeout(() => pwaPopup.classList.add('show'), 2000);
-      }
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon green" id="toastIcon"><i data-feather="bell" style="width:16px;height:16px;"></i></div>
+  <span id="toastMsg">New chat request</span>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getDatabase, ref, onValue, onChildAdded, onChildChanged, push, set, update, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+    authDomain: "fire-b-a8878.firebaseapp.com",
+    projectId: "fire-b-a8878",
+    databaseURL: "https://fire-b-a8878-default-rtdb.firebaseio.com",
+    appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  feather.replace();
+
+  // ── Theme ──────────────────────────────────────────────────────
+  const themeBtn = document.getElementById('themeBtn');
+  const themeIcon = document.getElementById('themeIcon');
+  let currentTheme = localStorage.getItem('admin_theme') || 'light';
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme',t); themeIcon.setAttribute('data-feather',t==='dark'?'sun':'moon'); feather.replace(); }
+  applyTheme(currentTheme);
+  themeBtn.addEventListener('click',()=>{ currentTheme=currentTheme==='dark'?'light':'dark'; localStorage.setItem('admin_theme',currentTheme); applyTheme(currentTheme); });
+
+  // ── Dialog ─────────────────────────────────────────────────────
+  const dialogOverlay = document.getElementById('dialogOverlay');
+  const dialogBox = document.getElementById('dialogBox');
+  function showDialog(title, msg, btns) {
+    document.getElementById('dialogTitle').textContent=title;
+    document.getElementById('dialogMsg').textContent=msg;
+    const db2=document.getElementById('dialogBtns'); db2.innerHTML='';
+    btns.forEach(b=>{ const el=document.createElement('button'); el.className=`d-btn ${b.cls||'sec'}`; el.textContent=b.text; el.onclick=()=>{ closeDialog(); if(b.fn)b.fn(); }; db2.appendChild(el); });
+    dialogOverlay.style.display='flex';
+    setTimeout(()=>{ dialogOverlay.style.opacity='1'; dialogBox.style.transform='scale(1)'; },10);
+  }
+  function closeDialog() { dialogOverlay.style.opacity='0'; dialogBox.style.transform='scale(0.95)'; setTimeout(()=>dialogOverlay.style.display='none',300); }
+  dialogOverlay.addEventListener('click',e=>{ if(e.target===dialogOverlay)closeDialog(); });
+
+  // ── Toast ──────────────────────────────────────────────────────
+  const toastEl = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  function showToast(msg, type='green') {
+    toastMsg.textContent=msg;
+    document.getElementById('toastIcon').className=`toast-icon ${type}`;
+    toastEl.classList.add('show');
+    setTimeout(()=>toastEl.classList.remove('show'),4000);
+    if(Notification.permission==='granted') new Notification('Rare Grade Tech',{body:msg,icon:'https://i.postimg.cc/tRMK3mNK/Steward-logo.png'});
+  }
+
+  // ── Auth ───────────────────────────────────────────────────────
+  let currentConsultant = null;
+  const authScreen = document.getElementById('authScreen');
+  const dashboard = document.getElementById('dashboard');
+
+  document.getElementById('signInBtn').addEventListener('click', async ()=>{
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch(e){ alert('Sign in failed: '+e.message); }
+  });
+  document.getElementById('signOutBtn').addEventListener('click',()=>{
+    showDialog("Sign Out","Are you sure?",[
+      {text:"Cancel"},{text:"Sign Out",cls:'red',fn:()=>signOut(auth)}
+    ]);
+  });
+
+  onAuthStateChanged(auth, user=>{
+    currentConsultant=user;
+    if(user){
+      authScreen.style.display='none';
+      dashboard.style.display='flex';
+      document.getElementById('consultantAvatar').src=user.photoURL||'';
+      document.getElementById('consultantName').textContent=user.displayName?.split(' ')[0]||'Agent';
+      initDashboard();
+      if(Notification.permission==='default') Notification.requestPermission();
+    } else {
+      authScreen.style.display='flex';
+      dashboard.style.display='none';
+    }
+  });
+
+  // ── State ──────────────────────────────────────────────────────
+  let allChats = {};      // chatId → chatData
+  let selectedChatId = null;
+  let currentTab = 'waiting';
+  let chatMsgsListener = null;
+  let chatTypingListener = null;
+  let seenChatIds = new Set();
+
+  // ── Init dashboard ─────────────────────────────────────────────
+  function initDashboard() {
+    // Listen to ALL live chats in real-time
+    onValue(ref(db,'livechats'), snap=>{
+      allChats={};
+      if(snap.exists()) snap.forEach(c=>{ allChats[c.key]=c.val(); });
+      renderQueue();
+      updateBadges();
     });
 
-    // Handle appinstalled event
-    window.addEventListener('appinstalled', () => {
-      localStorage.setItem('pwa_installed', 'true');
-      dismissPwaPopup(true);
-    });
-
-    // Install button click
-    pwaInstallBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          localStorage.setItem('pwa_installed', 'true');
-          dismissPwaPopup(true);
-        } else {
-          dismissPwaPopup(false);
+    // New chat notifications
+    onChildAdded(ref(db,'livechats'), snap=>{
+      const id=snap.key; const data=snap.val();
+      if(!seenChatIds.has(id)){
+        seenChatIds.add(id);
+        if(data.status==='waiting'){
+          showToast(`New chat request from ${data.userName||'a customer'}`, 'blue');
+          if(navigator.vibrate) navigator.vibrate([200,100,200]);
         }
-        deferredPrompt = null;
-      } else {
-        dismissPwaPopup(false);
       }
     });
 
-    // Dismiss button click
-    pwaDismissBtn.addEventListener('click', () => dismissPwaPopup(false));
+    // Chat status changes
+    onChildChanged(ref(db,'livechats'), snap=>{
+      const id=snap.key; const data=snap.val();
+      allChats[id]=data;
+      renderQueue();
+      updateBadges();
+      // If currently viewing this chat, update header
+      if(selectedChatId===id) renderChatHeader(id, data);
+    });
+  }
 
-    // Swipe-up to dismiss on the banner
-    const pwaBannerInner = pwaPopup.querySelector('.pwa-banner-inner');
-    pwaBannerInner.addEventListener('touchstart', (e) => {
-      pwaStartY = e.touches[0].clientY;
-      pwaPopup.style.transition = 'none';
-    }, { passive: true });
+  // ── Tab switching ──────────────────────────────────────────────
+  window.switchTab = function(tab){
+    currentTab=tab;
+    document.querySelectorAll('.q-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+    renderQueue();
+  };
 
-    pwaBannerInner.addEventListener('touchmove', (e) => {
-      const diff = e.touches[0].clientY - pwaStartY;
-      if (diff < 0) {
-        pwaPopup.style.transform = `translateY(${diff}px)`;
-        pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
-      }
-    }, { passive: true });
+  function updateBadges() {
+    const waiting=Object.values(allChats).filter(c=>c.status==='waiting').length;
+    const active=Object.values(allChats).filter(c=>c.status==='active'&&c.consultantId===currentConsultant?.uid).length;
+    const wb=document.getElementById('waitingBadge'); wb.textContent=waiting; wb.classList.toggle('show',waiting>0);
+    const ab=document.getElementById('activeBadge'); ab.textContent=active; ab.classList.toggle('show',active>0);
+  }
 
-    pwaBannerInner.addEventListener('touchend', (e) => {
-      const diff = e.changedTouches[0].clientY - pwaStartY;
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      if (diff < -40) {
-        dismissPwaPopup(false);
-      } else {
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-      }
-    }, { passive: true });
+  // ── Render queue list ──────────────────────────────────────────
+  function renderQueue() {
+    const list = document.getElementById('queueList');
+    const filtered = Object.entries(allChats).filter(([id,c])=>{
+      if(currentTab==='waiting') return c.status==='waiting';
+      if(currentTab==='active') return c.status==='active';
+      if(currentTab==='closed') return c.status==='closed';
+    }).sort(([,a],[,b])=>(b.createdAt||0)-(a.createdAt||0));
 
-    /**
-     * @param {boolean} permanent - true only when user actually installs
-     */
-    function dismissPwaPopup(permanent = false) {
-      if (permanent) {
-        localStorage.setItem('pwa_installed', 'true');
-      }
-      pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-      pwaPopup.style.transform = 'translateY(-110%)';
-      pwaPopup.style.opacity = '0';
-      pwaPopup.style.pointerEvents = 'none';
-      setTimeout(() => {
-        pwaPopup.classList.remove('show');
-        pwaPopup.style.transform = '';
-        pwaPopup.style.opacity = '';
-        pwaPopup.style.transition = '';
-        pwaPopup.style.pointerEvents = '';
-      }, 360);
+    if(!filtered.length){
+      list.innerHTML=`<div class="queue-empty"><i data-feather="inbox" style="width:48px;height:48px;"></i><p>${currentTab==='waiting'?'No customers waiting.':currentTab==='active'?'No active chats.':'No closed chats.'}</p></div>`;
+      feather.replace(); return;
     }
 
-    // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
-    // ══════════════════════════════════════════
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Steward AI ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker failed:', err));
+    list.innerHTML='';
+    filtered.forEach(([id,c])=>{
+      const div=document.createElement('div');
+      div.className=`queue-card ${c.status}${selectedChatId===id?' selected':''}`;
+      div.onclick=()=>selectChat(id);
+      const ts=c.createdAt?formatTime(c.createdAt):'';
+      const name=c.userName||'Guest';
+      div.innerHTML=`
+        <div class="qc-top">
+          <span class="qc-name">${esc(name)}</span>
+          <span class="qc-time">${ts}</span>
+        </div>
+        <div class="qc-email">${esc(c.userEmail||'No email')}</div>
+        <span class="qc-status ${c.status}">${c.status}</span>
+        ${c.lastMessage?`<div class="qc-last-msg">${esc(c.lastMessage)}</div>`:''}
+      `;
+      list.appendChild(div);
+    });
+    feather.replace();
+  }
+
+  // ── Select / open a chat ───────────────────────────────────────
+  async function selectChat(chatId) {
+    selectedChatId=chatId;
+    renderQueue(); // re-render to show selected state
+
+    const data=allChats[chatId]||{};
+    document.getElementById('chatEmptyState').style.display='none';
+    const acv=document.getElementById('activeChatView');
+    acv.style.display='flex';
+
+    // Clear messages & stop old listeners
+    stopChatListeners();
+    document.getElementById('chatMessages').innerHTML='';
+
+    renderChatHeader(chatId,data);
+
+    // Listen for messages
+    chatMsgsListener = onChildAdded(ref(db,`livechats/${chatId}/messages`), snap=>{
+      const msg=snap.val(); if(!msg) return;
+      appendMessage(msg.sender, msg.senderName, msg.text, msg.timestamp);
+      // Mark as read
+      if(msg.sender==='user'&&!msg.read&&data.status==='active') {
+        update(ref(db,`livechats/${chatId}/messages/${snap.key}`),{read:true}).catch(()=>{});
+      }
+    });
+
+    // Listen for user typing
+    chatTypingListener = onValue(ref(db,`livechats/${chatId}/userTyping`), snap=>{
+      document.getElementById('userTypingRow').classList.toggle('show', !!snap.val());
+    });
+  }
+
+  function renderChatHeader(chatId, data) {
+    const name=data.userName||'Guest';
+    document.getElementById('chatUserName').textContent=name;
+    document.getElementById('chatUserEmail').textContent=data.userEmail||'No email';
+    document.getElementById('chatUserAvatar').textContent=name[0]?.toUpperCase()||'?';
+
+    const banner=document.getElementById('chatTopBanner');
+    const actions=document.getElementById('chatActions');
+    const inputArea=document.getElementById('chatInputArea');
+    const bannerText=document.getElementById('chatBannerText');
+
+    actions.innerHTML='';
+    inputArea.style.display='none';
+    banner.classList.remove('show');
+
+    if(data.status==='waiting'){
+      const btn=document.createElement('button');
+      btn.className='chat-action-btn btn-accept';
+      btn.innerHTML='<i data-feather="phone-incoming" style="width:16px;height:16px;"></i> Accept Chat';
+      btn.onclick=()=>acceptChat(chatId,data);
+      actions.appendChild(btn);
+    } else if(data.status==='active'){
+      if(data.consultantId===currentConsultant?.uid){
+        bannerText.textContent=`You accepted this chat`;
+        banner.classList.add('show');
+        inputArea.style.display='block';
+        const btn=document.createElement('button');
+        btn.className='chat-action-btn btn-end';
+        btn.innerHTML='<i data-feather="phone-off" style="width:14px;height:14px;"></i> End Chat';
+        btn.onclick=()=>endChat(chatId);
+        actions.appendChild(btn);
+      } else {
+        bannerText.textContent=`Handled by ${data.consultantName||'another agent'}`;
+        banner.classList.add('show');
+      }
+    } else if(data.status==='closed'){
+      bannerText.textContent=`Chat ended${data.rating?` · Rated: ${data.rating==='good'?'👍':' 👎'}`:''}`;
+      banner.classList.add('show');
+    }
+    feather.replace();
+  }
+
+  // ── Accept chat ────────────────────────────────────────────────
+  async function acceptChat(chatId, data) {
+    try {
+      await update(ref(db,`livechats/${chatId}`),{
+        status: 'active',
+        consultantId: currentConsultant.uid,
+        consultantName: currentConsultant.displayName||'Agent',
+        consultantPhoto: currentConsultant.photoURL||'',
+        acceptedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       });
+      showToast(`You accepted ${data.userName}'s chat`, 'green');
+    } catch(e) { alert('Failed to accept: '+e.message); }
+  }
+
+  // ── End chat ───────────────────────────────────────────────────
+  function endChat(chatId) {
+    showDialog("End Chat","Are you sure you want to end this chat session?",[
+      {text:"Keep Open"},
+      {text:"End Chat",cls:'red',fn:async()=>{
+        try {
+          await update(ref(db,`livechats/${chatId}`),{status:'closed',closedBy:'consultant',closedAt:serverTimestamp(),updatedAt:serverTimestamp()});
+          // Send final message
+          await push(ref(db,`livechats/${chatId}/messages`),{sender:'consultant',senderName:currentConsultant.displayName||'Agent',text:'This chat has been closed. Thank you for contacting Rare Grade Tech!',timestamp:Date.now(),read:false});
+          showToast('Chat ended','green');
+        } catch(e){ alert('Error: '+e.message); }
+      }}
+    ]);
+  }
+
+  // ── Send consultant message ────────────────────────────────────
+  const consultantInput = document.getElementById('consultantInput');
+  const consultantSendBtn = document.getElementById('consultantSendBtn');
+
+  async function sendConsultantMsg() {
+    const text=consultantInput.value.trim();
+    if(!text||!selectedChatId) return;
+    consultantInput.value=''; consultantInput.style.height='auto';
+    consultantSendBtn.disabled=true;
+    try {
+      await push(ref(db,`livechats/${selectedChatId}/messages`),{
+        sender:'consultant',
+        senderName:currentConsultant.displayName||'Agent',
+        text,timestamp:Date.now(),read:false
+      });
+      await update(ref(db,`livechats/${selectedChatId}`),{lastMessage:text,updatedAt:serverTimestamp()});
+      // Set consultant typing to false
+      await set(ref(db,`livechats/${selectedChatId}/consultantTyping`),false);
+    } catch(e){ console.error(e); }
+    consultantSendBtn.disabled=false;
+  }
+
+  consultantSendBtn.addEventListener('click',sendConsultantMsg);
+  consultantInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendConsultantMsg();} });
+  consultantInput.addEventListener('input',function(){
+    this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px';
+    if(selectedChatId){
+      set(ref(db,`livechats/${selectedChatId}/consultantTyping`),true);
+      clearTimeout(window._cTypingTimer);
+      window._cTypingTimer=setTimeout(()=>{ if(selectedChatId)set(ref(db,`livechats/${selectedChatId}/consultantTyping`),false); },2000);
     }
+  });
 
-      }
-      mainScroll.scrollTop = mainScroll.scrollHeight;
-    };
+  // ── Quick replies ──────────────────────────────────────────────
+  window.useQuickReply = function(text) { consultantInput.value=text; consultantInput.focus(); };
 
-    window.retryLastMessage = function(retryId) {
-        const el = document.getElementById(retryId);
-        if (el) el.remove();
-        const lastUserIndex = window.chatHistory.map((m, i) => m.role === 'user' ? i : -1).filter(i => i !== -1).pop();
-        if (lastUserIndex !== undefined) {
-            const lastUserMsg = window.chatHistory[lastUserIndex];
-            window.chatHistory = window.chatHistory.slice(0, lastUserIndex);
-            userInput.value = lastUserMsg.content;
-            window.handleSend();
-        }
-    };
+  // ── Append message ─────────────────────────────────────────────
+  function appendMessage(sender, senderName, text, timestamp) {
+    const isUser=sender==='user';
+    const container=document.getElementById('chatMessages');
+    const div=document.createElement('div');
+    div.className=`lc-msg-row ${isUser?'user':'consultant'}`;
+    div.innerHTML=`
+      ${!isUser?`<div class="msg-avatar-sm">${(senderName||'A')[0].toUpperCase()}</div>`:''}
+      <div>
+        <div class="lc-bubble ${isUser?'user':'consultant'}">${esc(text)}</div>
+        <div class="bubble-time">${formatTime(timestamp||Date.now())}</div>
+      </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop=container.scrollHeight;
+  }
 
-    sendBtn.onclick = window.handleSend;
+  // ── Stop listeners ─────────────────────────────────────────────
+  function stopChatListeners() {
+    // Firebase onChildAdded/onValue listeners are not easily detachable without refs,
+    // so we use a flag approach. In production use off() with stored listener refs.
+    chatMsgsListener=null; chatTypingListener=null;
+  }
 
-    // Sidebar search
-    const historySearchInput = document.getElementById('historySearchInput');
-    historySearchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        document.querySelectorAll('.history-item').forEach(item => {
-            const text = item.querySelector('.history-text').textContent.toLowerCase();
-            item.style.display = text.includes(term) ? 'flex' : 'none';
-        });
-    });
-  </script>
+  // ── Helpers ────────────────────────────────────────────────────
+  function esc(t='') { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function formatTime(ts) {
+    if(!ts) return '';
+    const d=new Date(ts);
+    const now=new Date();
+    const isToday=d.toDateString()===now.toDateString();
+    if(isToday) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString([],{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }
+</script>
 </body>
 </html>
